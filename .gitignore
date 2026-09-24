@@ -1,0 +1,18 @@
+# runtime — not for publish
+logs/*.jsonl
+logs/*.log
+logs/c2/
+reports/*.json
+reports/*.md
+reports/*.html
+reports/dump/
+reports/evidence/
+loot/
+cookies.txt
+*.session
+__pycache__/
+*.pyc
+*.pyo
+_tmp_seclists/
+.env
+.DS_Store

