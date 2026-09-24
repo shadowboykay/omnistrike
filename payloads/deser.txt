@@ -1,0 +1,7 @@
+rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA==
+rO0ABXNyADJvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnM=
+O:8:"stdClass":1:{s:1:"a";s:3:"cmd";}
+a:2:{i:0;s:3:"foo";i:1;O:8:"stdClass":0:{}}
+gASVAAAAAAAAAA==
+AAEAAAD/////AQAAAAAAAAAMAgAAAFRTeXN0ZW0u
+/wEPDwUKMTIzNDU2Nzg5

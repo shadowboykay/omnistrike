@@ -1,6 +1,7 @@
 """oauth_misconfig — OAuth 2.0 / OIDC misconfig probe"""
 from urllib.parse import urlparse, urlencode, parse_qs
 from core.http import HttpClient
+from core.payload_source import get_payloads
 from core.probe import Probe
 
 class OauthMisconfig:

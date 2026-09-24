@@ -22,10 +22,11 @@ CONTEXT_FILES = {
     "xslt":        ["xslt.txt"],
     "csti":        ["csti.txt"],
     "ssi":         ["ssi_injection.txt"],
+    "deser":        ["deser.txt"],
     "crlf":        ["crlf.txt"],
     "nosql":       ["nosql.txt"],
-    "saml":        [],
-    "oauth":       [],
+    "saml":        ["saml.txt"],
+    "oauth":       ["oauth.txt"],
 }
 
 # built-in fallbacks if file is empty or missing

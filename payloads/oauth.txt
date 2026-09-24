@@ -1,0 +1,9 @@
+redirect_uri=https://evil.attacker.example
+redirect_uri=https://evil.attacker.example/callback
+redirect_uri=https://legit.com.evil.attacker.example
+redirect_uri=https://legit.com@evil.attacker.example
+redirect_uri=//evil.attacker.example
+redirect_uri=https://legit.com%00.evil.attacker.example
+response_type=token
+response_type=code&scope=openid+profile+email
+response_mode=fragment
