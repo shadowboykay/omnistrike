@@ -159,3 +159,7 @@ def mutate_headers(headers, n=3):
 
 # backward-compat alias (probe.py imports `mutate`)
 mutate = mutate_param
+
+
+# compat alias for probe (older name)
+mutate = mutate_param

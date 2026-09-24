@@ -95,7 +95,11 @@ MUTATORS = [
     _random_pad, _concat_split,
 ]
 
-def mutate(payload: str, variants: int = 5) -> list[str]:
+def mutate(payload, n=None, variants=None, base_first=True):
+    """Backward-compat: accepts n= or variants=; delegates to core.mutator.mutate_param."""
+    from core.mutator import mutate_param
+    count = n if n is not None else (variants if variants is not None else 5)
+    return mutate_param(payload, n=count, base_first=base_first)
     """Generate `variants` mutated versions of payload."""
     out = [payload]
     for _ in range(variants):
