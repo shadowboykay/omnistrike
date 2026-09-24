@@ -41,15 +41,23 @@ def menu_main():
         print("  3. Список всех модулей")
         print("  4. Список цепочек")
         print("  5. Аудит защиты сайта (security_audit)")
-        print("  6. Выход")
+        print("  6. Прокси: обновить список")
+        print("  7. Прокси: показать рабочие")
+        print("  8. Tor: проверить и использовать")
+        print("  9. Sniper-режим (точные удары)")
+        print("  0. Выход")
         print()
-        c = ask("Выбор [1-6]: ")
+        c = ask("Выбор [0-9]: ")
         if c == "1": menu_run_module()
         elif c == "2": menu_chain()
         elif c == "3": menu_list()
         elif c == "4": menu_chains_list()
         elif c == "5": menu_audit()
-        elif c == "6": break
+        elif c == "6": menu_proxy_update()
+        elif c == "7": menu_proxy_show()
+        elif c == "8": menu_tor()
+        elif c == "9": menu_sniper()
+        elif c == "0": break
         else: input("Неверно. Enter для продолжения")
 
 
@@ -212,6 +220,66 @@ def main():
         menu_main()
     except KeyboardInterrupt:
         print("\n[выход]")
+
+
+
+
+def menu_proxy_update():
+    clear(); banner()
+    print("Обновление списка прокси (может занять 1-3 минуты)...")
+    print()
+    try:
+        from core.proxy_manager import update_all
+        working = update_all(kinds=("https", "socks5"), limit=100)
+        print(f"\n[done] {len(working)} рабочих прокси")
+    except Exception as e:
+        print(f"[!] {type(e).__name__}: {e}")
+    input("\nEnter для возврата...")
+
+
+def menu_proxy_show():
+    clear(); banner()
+    try:
+        from core.proxy_manager import load_cache
+        working = load_cache()
+        print(f"Рабочих прокси: {len(working)}")
+        print()
+        for i, p in enumerate(working[:30], 1):
+            print(f"  {i:2d}. {p}")
+        if len(working) > 30:
+            print(f"  ... и ещё {len(working) - 30}")
+    except Exception as e:
+        print(f"[!] {e}")
+    input("\nEnter для возврата...")
+
+
+def menu_tor():
+    clear(); banner()
+    print("Tor проверка...")
+    print("Убедись что Tor запущен: tor -f ~/.tor/torrc &")
+    print()
+    target = ask("Target через Tor: ")
+    if not target:
+        return
+    try:
+        os.system(f"python omni.py run evasion tor_auto --target '{target}'")
+    except Exception as e:
+        print(f"[!] {e}")
+    input("\nEnter для возврата...")
+
+
+def menu_sniper():
+    clear(); banner()
+    target = ask("Target (URL с параметром ?id=1): ")
+    if not target:
+        return
+    proxy = ask("Proxy (Enter для пропуска): ")
+    try:
+        os.system(f"python omni.py run evasion sniper_mode --target '{target}'" +
+                  (f" --proxy '{proxy}'" if proxy else ""))
+    except Exception as e:
+        print(f"[!] {e}")
+    input("\nEnter для возврата...")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,778 @@
+{
+  "CVE-2026-57232": {
+    "ghsa_id": "GHSA-87mg-5grr-rhwh",
+    "summary": "Contao: Server-Side Request Forgery (SSRF) via Unvalidated RSS Feed URL in Feed Reader Module",
+    "severity": "low",
+    "cvss": 3.1,
+    "ecosystem": "composer",
+    "published": "2026-09-24T19:59:16Z"
+  },
+  "CVE-2026-57179": {
+    "ghsa_id": "GHSA-vqg6-3fw6-j9jg",
+    "summary": "social-auth-core has a Session Fixation issue",
+    "severity": "medium",
+    "cvss": 4.2,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:58:14Z"
+  },
+  "CVE-2026-57178": {
+    "ghsa_id": "GHSA-3c93-f73f-qc9h",
+    "summary": "social-auth-core: VK App backend accepts unsigned callback data when auth_key is missing",
+    "severity": "high",
+    "cvss": 7.4,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:57:22Z"
+  },
+  "CVE-2026-57177": {
+    "ghsa_id": "GHSA-x7qq-23vw-7pfg",
+    "summary": "social-auth-core has Login CSRF via Missing State Parameter in LoginRadius Backend",
+    "severity": "medium",
+    "cvss": 4.3,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:56:39Z"
+  },
+  "CVE-2026-57176": {
+    "ghsa_id": "GHSA-fp7w-m676-w7gc",
+    "summary": "social-auth-core Vulnerable to Account Takeover via Identity Binding Flaw in Vend Backend",
+    "severity": "medium",
+    "cvss": 6.8,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:55:57Z"
+  },
+  "CVE-2026-57175": {
+    "ghsa_id": "GHSA-vq6g-g6c7-5f2j",
+    "summary": "social-auth-core has an Improper Authentication issue",
+    "severity": "medium",
+    "cvss": 6.4,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:54:48Z"
+  },
+  "CVE-2026-55736": {
+    "ghsa_id": "GHSA-f4hc-ppw9-4hhw",
+    "summary": "Ash: Private action arguments can be set by user input via string-keyed params and atomic changesets",
+    "severity": "medium",
+    "cvss": null,
+    "ecosystem": "erlang",
+    "published": "2026-09-24T19:53:36Z"
+  },
+  "CVE-2026-57171": {
+    "ghsa_id": "GHSA-r4vp-3vw6-r2x5",
+    "summary": "Trestle is vulnerable to arbitrary file write via path traversal in author generate commands (Incomplete fix of CVE-2026-46345)",
+    "severity": "high",
+    "cvss": 8.4,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:52:34Z"
+  },
+  "CVE-2026-57170": {
+    "ghsa_id": "GHSA-mr95-65j8-9mxp",
+    "summary": "Trestle SSTI in Jinja2 include tags allows arbitrary code execution (Incomplete fix of CVE-2026-46439)",
+    "severity": "high",
+    "cvss": 7.8,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:50:27Z"
+  },
+  "CVE-2026-59723": {
+    "ghsa_id": "GHSA-3cj3-hqcr-g934",
+    "summary": "Cline: Cross-Origin WebSocket Hijacking in Cline Hub Dashboard (`/browser` endpoint)",
+    "severity": "high",
+    "cvss": 8.8,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:48:34Z"
+  },
+  "CVE-2026-61815": {
+    "ghsa_id": "GHSA-36h5-qg4p-q2qf",
+    "summary": "zbateson/mail-mime-parser has CRLF header injection via attachment filename",
+    "severity": "high",
+    "cvss": 7.2,
+    "ecosystem": "composer",
+    "published": "2026-09-24T19:46:32Z"
+  },
+  "CVE-2026-61816": {
+    "ghsa_id": "GHSA-f6v3-2qmr-vfjx",
+    "summary": "zbateson/mail-mime-parser has uncontrolled resource consumption (CPU/memory DoS) parsing untrusted MIME",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "composer",
+    "published": "2026-09-24T19:45:05Z"
+  },
+  "CVE-2026-59980": {
+    "ghsa_id": "GHSA-8v8h-hg4w-mvq2",
+    "summary": "hpack: Unbounded variable integer decoding can cause run-away computation on malformed input",
+    "severity": "medium",
+    "cvss": null,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:43:26Z"
+  },
+  "CVE-2026-61782": {
+    "ghsa_id": "GHSA-jmg2-rcxh-w8q3",
+    "summary": "@rsdoctor/rspack-plugin has Unauthenticated HTTP API that Exposes Project Source Code and Build Metadata",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:42:10Z"
+  },
+  "CVE-2026-57231": {
+    "ghsa_id": "GHSA-4hq8-gpf5-8p68",
+    "summary": "Podman: Malformed Image can trick podman run into leaking host environment variables into the container",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "go",
+    "published": "2026-09-24T19:40:20Z"
+  },
+  "CVE-2026-56742": {
+    "ghsa_id": "GHSA-w7c2-w76w-5hmj",
+    "summary": "Cilium: Namespaced HTTPRoutes can redirect traffic to other namespaces",
+    "severity": "medium",
+    "cvss": 5.9,
+    "ecosystem": "go",
+    "published": "2026-09-24T19:38:39Z"
+  },
+  "CVE-2026-61788": {
+    "ghsa_id": "GHSA-mwwr-p57h-56pf",
+    "summary": "@bytebase/dbhub's read-only mode does not prevent database writes",
+    "severity": "high",
+    "cvss": 7.4,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:37:59Z"
+  },
+  "CVE-2026-61742": {
+    "ghsa_id": "GHSA-fm8p-53ww-hf6w",
+    "summary": "DBHub HTTP transport DNS rebinding allows unauthenticated browser-origin SQL execution",
+    "severity": "critical",
+    "cvss": null,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:36:57Z"
+  },
+  "CVE-2026-61741": {
+    "ghsa_id": "GHSA-cjx3-73hr-rpw7",
+    "summary": "http4s-scala-xml has an XML External Entity (XXE) processing issue",
+    "severity": "critical",
+    "cvss": 9.3,
+    "ecosystem": "maven",
+    "published": "2026-09-24T19:35:16Z"
+  },
+  "CVE-2026-61784": {
+    "ghsa_id": "GHSA-j8r4-32c5-33rc",
+    "summary": "xhtml-purifier has HTML attribute-injection (sanitizer bypass) that leads to XSS",
+    "severity": "medium",
+    "cvss": 6.1,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:33:23Z"
+  },
+  "CVE-2026-56744": {
+    "ghsa_id": "GHSA-36f9-7rg5-cpf8",
+    "summary": "`@bsv/wallet-toolbox` / `-client` / `-mobile` don't verify storage-supplied recipient output scripts against caller-requested outputs in createAction",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:32:00Z"
+  },
+  "CVE-2026-56738": {
+    "ghsa_id": "GHSA-rw77-vq4g-x3hp",
+    "summary": "phpMyFAQ has SQL Injection in `StopWords::add()` \u2014 Unescaped Stop Word Insertion",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "composer",
+    "published": "2026-09-24T19:30:07Z"
+  },
+  "CVE-2026-56737": {
+    "ghsa_id": "GHSA-8gpw-xvpf-hvx5",
+    "summary": "phpMyFAQ's two-factor authentication login bypasses the password factor",
+    "severity": "high",
+    "cvss": 8.1,
+    "ecosystem": "composer",
+    "published": "2026-09-24T19:29:27Z"
+  },
+  "CVE-2026-56736": {
+    "ghsa_id": "GHSA-pgwp-vc7q-cvj3",
+    "summary": "phpMyFAQ has Stored XSS in Admin FAQ Editor via HTML Entity Bypass in Frontend FAQ Submission",
+    "severity": "high",
+    "cvss": 8.2,
+    "ecosystem": "composer",
+    "published": "2026-09-24T19:28:43Z"
+  },
+  "CVE-2026-57439": {
+    "ghsa_id": "GHSA-fx6f-382r-j72c",
+    "summary": "CyberChef: Prototype pollution in Series Chart operation",
+    "severity": "medium",
+    "cvss": 5.0,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:24:30Z"
+  },
+  "CVE-2026-61604": {
+    "ghsa_id": "GHSA-w3rp-4cm2-4wgc",
+    "summary": "ixo Blockchain x/bonds DID-resolved payer drain + x/entity ICA authorization bypass",
+    "severity": "critical",
+    "cvss": null,
+    "ecosystem": "go",
+    "published": "2026-09-24T19:22:53Z"
+  },
+  "CVE-2026-61732": {
+    "ghsa_id": "GHSA-g5f9-3xfg-p9mf",
+    "summary": "Decepticon: Role-boundary forgery via ChatML special-token literals in web crawl output composed into LLM context",
+    "severity": "critical",
+    "cvss": 10.0,
+    "ecosystem": "pip",
+    "published": "2026-09-24T19:17:49Z"
+  },
+  "CVE-2026-12958": {
+    "ghsa_id": "GHSA-6v3r-4p5c-mrp5",
+    "summary": "Language Servers for AWS vulnerable to arbitrary file write",
+    "severity": "high",
+    "cvss": 7.8,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:15:39Z"
+  },
+  "CVE-2026-12957": {
+    "ghsa_id": "GHSA-xhcr-j4j9-3gh7",
+    "summary": "Language Servers for AWS Vulnerable to Arbitrary Code Execution",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "npm",
+    "published": "2026-09-24T19:13:53Z"
+  },
+  "CVE-2026-63498": {
+    "ghsa_id": "GHSA-396x-xmvh-p563",
+    "summary": "Snipe-IT: Stored XSS via Inline XML Rendering in the Uploaded Files API",
+    "severity": "high",
+    "cvss": 8.7,
+    "ecosystem": "composer",
+    "published": "2026-09-24T18:19:38Z"
+  },
+  "CVE-2026-85056": {
+    "ghsa_id": "GHSA-9993-rfwp-rhwf",
+    "summary": "ZITADEL: MFA bypass via session reuse in Login V2",
+    "severity": "high",
+    "cvss": 8.2,
+    "ecosystem": "go",
+    "published": "2026-09-24T18:19:35Z"
+  },
+  "CVE-2026-85057": {
+    "ghsa_id": "GHSA-fgmf-7rf8-m6vf",
+    "summary": "ZITADEL: Actions V1 sandbox escape: host file read via require()",
+    "severity": "high",
+    "cvss": 8.7,
+    "ecosystem": "go",
+    "published": "2026-09-24T18:19:32Z"
+  },
+  "CVE-2026-62368": {
+    "ghsa_id": "GHSA-p9h3-gvpq-5539",
+    "summary": "Snipe-IT: Stored XSS via Custom Field name in asset-list column headers",
+    "severity": "high",
+    "cvss": 8.1,
+    "ecosystem": "composer",
+    "published": "2026-09-24T18:19:30Z"
+  },
+  "CVE-2026-62286": {
+    "ghsa_id": "GHSA-xcw9-qmmf-vqxj",
+    "summary": "Dozzle label filters do not restrict container event and statistics streams",
+    "severity": "medium",
+    "cvss": 4.3,
+    "ecosystem": "go",
+    "published": "2026-09-24T18:15:10Z"
+  },
+  "CVE-2026-63493": {
+    "ghsa_id": "GHSA-hxcx-9h4f-42xx",
+    "summary": "Snipe-IT: 2FA bypass via the API token flow",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "composer",
+    "published": "2026-09-24T16:38:27Z"
+  },
+  "CVE-2026-19730": {
+    "ghsa_id": "GHSA-fx76-2j3w-2mx6",
+    "summary": "podman quadlet install --replace does not fully replace the old file",
+    "severity": "medium",
+    "cvss": 4.2,
+    "ecosystem": "go",
+    "published": "2026-09-24T16:28:26Z"
+  },
+  "CVE-2026-92164": {
+    "ghsa_id": "GHSA-vf2x-4v53-pm7v",
+    "summary": "Streamlink: HTTPSession follows HTTP redirects into file:// URLs, reading local files",
+    "severity": "medium",
+    "cvss": 6.5,
+    "ecosystem": "pip",
+    "published": "2026-09-24T14:58:04Z"
+  },
+  "CVE-2026-59167": {
+    "ghsa_id": "GHSA-6rf4-v2fh-m6p4",
+    "summary": "SunEditor: Critical XSS vulnerability - sanitizer bypass",
+    "severity": "critical",
+    "cvss": 10.0,
+    "ecosystem": "npm",
+    "published": "2026-09-24T14:57:55Z"
+  },
+  "CVE-2026-62998": {
+    "ghsa_id": "GHSA-4f5f-j737-pm58",
+    "summary": "REDAXO: Unwhitelisted ORDER BY Column in rex_list Allows Authenticated Column Enumeration",
+    "severity": "medium",
+    "cvss": 4.3,
+    "ecosystem": "composer",
+    "published": "2026-09-24T14:57:07Z"
+  },
+  "CVE-2026-56669": {
+    "ghsa_id": "GHSA-9643-4qgh-g8mx",
+    "summary": "elysia has Inefficient Algorithmic Complexity and Interpretation Conflict",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "npm",
+    "published": "2026-09-23T21:54:50Z"
+  },
+  "CVE-2026-61685": {
+    "ghsa_id": "GHSA-wmw4-mw6x-6vfm",
+    "summary": "ReactPress has SQL injection via dynamic column names in TypeORM query builders",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "npm",
+    "published": "2026-09-23T21:51:59Z"
+  },
+  "CVE-2026-57576": {
+    "ghsa_id": "GHSA-5426-92w4-wvhv",
+    "summary": "plone.app.dexterity has a Denial of Service due to excessive title or description length",
+    "severity": "medium",
+    "cvss": 6.5,
+    "ecosystem": "pip",
+    "published": "2026-09-23T21:48:22Z"
+  },
+  "CVE-2026-77394": {
+    "ghsa_id": "GHSA-gvf2-2rh5-mpgf",
+    "summary": "OpenC3 COSMOS: Stored, cross-user XSS via Telemetry screen BUTTON widget",
+    "severity": "high",
+    "cvss": 7.6,
+    "ecosystem": "npm",
+    "published": "2026-09-23T21:24:11Z"
+  },
+  "CVE-2026-82407": {
+    "ghsa_id": "GHSA-9wh6-9hq7-9688",
+    "summary": "Klever-Go: Validator registration accepts an unvalidated BLS public key \u2192 consensus liveness DoS",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "go",
+    "published": "2026-09-23T21:24:08Z"
+  },
+  "CVE-2026-82409": {
+    "ghsa_id": "GHSA-7c7c-373r-gfjj",
+    "summary": "Klever-Go: Elasticsearch bulk / painless injection via on-chain account name -> explorer/indexer data forgery",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "go",
+    "published": "2026-09-23T21:24:06Z"
+  },
+  "CVE-2026-82406": {
+    "ghsa_id": "GHSA-26r5-4mm2-px5c",
+    "summary": "Klever-Go: Zombie-order theft: `Buy` missing `IsClaimed` guard in native marketplace",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "go",
+    "published": "2026-09-23T21:24:03Z"
+  },
+  "CVE-2026-76089": {
+    "ghsa_id": "GHSA-9rg8-2wvr-fgjh",
+    "summary": "Formie: Missing authorization on sent notification resend modal exposes submission PII",
+    "severity": "high",
+    "cvss": 7.7,
+    "ecosystem": "composer",
+    "published": "2026-09-23T21:24:01Z"
+  },
+  "CVE-2026-61814": {
+    "ghsa_id": "GHSA-w4cm-gvhj-cgw6",
+    "summary": "Jawn: Quadratic parsing effort in AsyncParser",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "maven",
+    "published": "2026-09-23T21:23:58Z"
+  },
+  "CVE-2026-59990": {
+    "ghsa_id": "GHSA-cc4v-rvgp-2pf3",
+    "summary": "Jawn: Uncontrolled nesting depth in JSON parser",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "maven",
+    "published": "2026-09-23T21:23:54Z"
+  },
+  "CVE-2026-82405": {
+    "ghsa_id": "GHSA-97cv-x867-6xhm",
+    "summary": "Klever-Go Account takeover: `kleverUpdateAccountPermission` authorizes on attacker-controlled `RecipientAddr` instead of the authenticated caller",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "go",
+    "published": "2026-09-23T19:27:08Z"
+  },
+  "CVE-2026-86065": {
+    "ghsa_id": "GHSA-4fwh-wrm6-97xm",
+    "summary": "Klever-Go: Unauthenticated WebSocket /subscribe: no read-size limit, no connection cap, permissive origin -> remote node memory/goroutine exhaustion (DoS)",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "go",
+    "published": "2026-09-23T19:16:40Z"
+  },
+  "CVE-2026-86064": {
+    "ghsa_id": "GHSA-9v8p-frvj-2pcm",
+    "summary": "Klever-Go: /log controls global node logging",
+    "severity": "high",
+    "cvss": 8.6,
+    "ecosystem": "go",
+    "published": "2026-09-23T19:13:46Z"
+  },
+  "CVE-2026-93421": {
+    "ghsa_id": "GHSA-g7f6-rxc4-qhph",
+    "summary": "Mesop: Unauthenticated ANSI Escape Sequence Injection in CSP Reporting Endpoint",
+    "severity": "medium",
+    "cvss": null,
+    "ecosystem": "pip",
+    "published": "2026-09-23T19:01:05Z"
+  },
+  "CVE-2026-77602": {
+    "ghsa_id": "GHSA-jjq7-m736-w977",
+    "summary": "OpenC3 COSMOS: Authenticated remote code execution via the user-writable config overlay (table definitions, cmd/tlm definitions, and script suites)",
+    "severity": "critical",
+    "cvss": 9.9,
+    "ecosystem": "rubygems",
+    "published": "2026-09-23T18:57:24Z"
+  },
+  "CVE-2026-77601": {
+    "ghsa_id": "GHSA-vp3w-52v9-q57f",
+    "summary": "OpenC3 COSMOS: Authenticated OS command injection via the `pypi_url` setting",
+    "severity": "high",
+    "cvss": 8.8,
+    "ecosystem": "rubygems",
+    "published": "2026-09-23T18:51:01Z"
+  },
+  "CVE-2026-61695": {
+    "ghsa_id": "GHSA-86wm-r4c5-2rc9",
+    "summary": "Wire Swift runtime: negative LENGTH_DELIMITED length in skipGroup() crashes any protobuf-decoding service",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "swift",
+    "published": "2026-09-23T18:45:52Z"
+  },
+  "CVE-2026-76087": {
+    "ghsa_id": "GHSA-584p-f93j-wpgc",
+    "summary": "Formie: Unauthenticated users can overwrite incomplete submissions via submit action",
+    "severity": "high",
+    "cvss": 8.2,
+    "ecosystem": "composer",
+    "published": "2026-09-23T18:36:44Z"
+  },
+  "CVE-2026-76086": {
+    "ghsa_id": "GHSA-v3f3-cmj4-cvj9",
+    "summary": "Formie: Integration form-settings action allows SSRF and exfiltration of stored integration credentials",
+    "severity": "high",
+    "cvss": 8.5,
+    "ecosystem": "composer",
+    "published": "2026-09-23T18:33:57Z"
+  },
+  "CVE-2026-92692": {
+    "ghsa_id": "GHSA-jg26-q8hg-3pq4",
+    "summary": "Sulu: JCR-SQL2 injection via `categories` query parameter (unauthenticated)",
+    "severity": "medium",
+    "cvss": null,
+    "ecosystem": "composer",
+    "published": "2026-09-23T18:21:22Z"
+  },
+  "CVE-2026-77421": {
+    "ghsa_id": "GHSA-ph9c-7hw9-vhhw",
+    "summary": "JLine: ReDoS in Nano Editor Regex Search Mode",
+    "severity": "medium",
+    "cvss": 6.5,
+    "ecosystem": "maven",
+    "published": "2026-09-23T18:12:38Z"
+  },
+  "CVE-2026-77422": {
+    "ghsa_id": "GHSA-r2xf-8xr9-62gw",
+    "summary": "JLine: ReDoS in Built-in grep Command Amplified by Automatic `.*` Wrapping",
+    "severity": "high",
+    "cvss": 7.5,
+    "ecosystem": "maven",
+    "published": "2026-09-23T18:12:35Z"
+  },
+  "CVE-2026-56679": {
+    "ghsa_id": "GHSA-vmjq-hvgq-2wv4",
+    "summary": "9router: Mass assignment in PATCH /api/settings allows authenticated authorization downgrade",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "npm",
+    "published": "2026-09-23T18:12:33Z"
+  },
+  "CVE-2026-56678": {
+    "ghsa_id": "GHSA-6mwv-4mrm-5p3m",
+    "summary": "9router: Kiro region injection allows authenticated SSRF with Authorization header forwarding",
+    "severity": "medium",
+    "cvss": 6.4,
+    "ecosystem": "npm",
+    "published": "2026-09-23T18:12:30Z"
+  },
+  "CVE-2026-56676": {
+    "ghsa_id": "GHSA-cmhj-wh2f-9cgx",
+    "summary": "9router: Image prefetch DNS rebinding allows SSRF to internal services",
+    "severity": "high",
+    "cvss": 7.4,
+    "ecosystem": "npm",
+    "published": "2026-09-23T18:12:28Z"
+  },
+  "CVE-2026-56675": {
+    "ghsa_id": "GHSA-x5c9-v98j-722r",
+    "summary": "9router /v1 APIs has unauthenticated access via reverse proxy locality collapse",
+    "severity": "high",
+    "cvss": 8.3,
+    "ecosystem": "npm",
+    "published": "2026-09-23T18:12:26Z"
+  },
+  "CVE-2026-77420": {
+    "ghsa_id": "GHSA-5q95-hrpc-m3w3",
+    "summary": "JLine: ReDoS via `HISTORY_IGNORE` Configuration Variable",
+    "severity": "medium",
+    "cvss": 5.5,
+    "ecosystem": "maven",
+    "published": "2026-09-23T18:12:05Z"
+  },
+  "CVE-2026-85724": {
+    "ghsa_id": "GHSA-5f42-97gr-vfhq",
+    "summary": "Moquette: Pattern-ACL wildcard injection (cross-tenant authorization bypass) plus a remote-unauthenticated DoS cluster, a Will-message authorization bypass, and a cross-session durable-corruption bug",
+    "severity": "critical",
+    "cvss": 9.6,
+    "ecosystem": "maven",
+    "published": "2026-09-23T16:11:18Z"
+  },
+  "CVE-2026-73858": {
+    "ghsa_id": "GHSA-gxrg-x694-283w",
+    "summary": "Solspace Freeform: Limited Twig template injection via submitted field values",
+    "severity": "medium",
+    "cvss": 5.3,
+    "ecosystem": "composer",
+    "published": "2026-09-23T14:31:10Z"
+  },
+  "CVE-2026-88974": {
+    "ghsa_id": "GHSA-5mmc-8pc9-wggg",
+    "summary": "WPGraphQL: Contributor can publish and modify posts without the required capabilities via updatePost",
+    "severity": "medium",
+    "cvss": 5.4,
+    "ecosystem": "composer",
+    "published": "2026-09-23T14:13:04Z"
+  },
+  "CVE-2026-63000": {
+    "ghsa_id": "GHSA-m8r3-22v6-g877",
+    "summary": "REDAXO: Missing CSRF Protection on Package Update Action Allows Forced Addon Updates",
+    "severity": "medium",
+    "cvss": 6.4,
+    "ecosystem": "composer",
+    "published": "2026-09-23T14:09:15Z"
+  },
+  "CVE-2026-63002": {
+    "ghsa_id": "GHSA-w998-qmw9-mf4m",
+    "summary": "REDAXO: Stored XSS in Mediapool Sync Page via Unescaped Filesystem Filenames",
+    "severity": "medium",
+    "cvss": 4.8,
+    "ecosystem": "composer",
+    "published": "2026-09-23T14:06:04Z"
+  },
+  "CVE-2026-63001": {
+    "ghsa_id": "GHSA-mf2p-wjp4-99pq",
+    "summary": "REDAXO: Stored XSS via Unescaped Media Manager Type Name in `mediaIsInUse()`",
+    "severity": "medium",
+    "cvss": 4.8,
+    "ecosystem": "composer",
+    "published": "2026-09-23T14:04:40Z"
+  },
+  "CVE-2026-54892": {
+    "ghsa_id": "GHSA-j43x-5hjq-rgxf",
+    "summary": " Plug: quadratic-time decoding of nested query/body parameters enables denial of service",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "erlang",
+    "published": "2026-09-23T14:00:22Z"
+  },
+  "CVE-2026-61541": {
+    "ghsa_id": "GHSA-5vjj-2r48-q622",
+    "summary": "Zapros has an Unbounded Content-Encoding decompression chain that allows denial of service",
+    "severity": "medium",
+    "cvss": null,
+    "ecosystem": "pip",
+    "published": "2026-09-23T13:58:35Z"
+  },
+  "CVE-2026-61652": {
+    "ghsa_id": "GHSA-6cp7-3m3c-5x5c",
+    "summary": "Zapros: Streaming decoders ignored the requested chunk size, allowing a single compressed response chunk to allocate unbounded memory (decompression bomb)",
+    "severity": "high",
+    "cvss": null,
+    "ecosystem": "pip",
+    "published": "2026-09-23T13:57:48Z"
+  },
+  "CVE-2026-57149": {
+    "ghsa_id": "GHSA-rr49-f9g6-c9r5",
+    "summary": "plone.app.portlets Vulnerable to Remote Code Execution via TALES Injection",
+    "severity": "critical",
+    "cvss": 9.9,
+    "ecosystem": "pip",
+    "published": "2026-09-23T13:55:47Z"
+  },
+  "CVE-2026-91130": {
+    "ghsa_id": "GHSA-wx4m-69m9-gx3m",
+    "summary": "Home Assistant: XSS in Statistics Graph Card",
+    "severity": "critical",
+    "cvss": null,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:40:55Z"
+  },
+  "CVE-2026-91129": {
+    "ghsa_id": "GHSA-4ghv-53cq-7wp3",
+    "summary": "Home Assistant: mDNS Server-Side Request Forgery",
+    "severity": "medium",
+    "cvss": 5.4,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:40:51Z"
+  },
+  "CVE-2026-88010": {
+    "ghsa_id": "GHSA-8fcf-v89g-xpg6",
+    "summary": "Traefik: BasicAuth singleflight coalescing reintroduces an unauthenticated username-enumeration timing oracle",
+    "severity": "medium",
+    "cvss": null,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:40:49Z"
+  },
+  "CVE-2026-88978": {
+    "ghsa_id": "GHSA-992g-9cr3-vm5x",
+    "summary": "Hatchet DurableTask WorkerStatus gRPC resolves caller-supplied durable-task UUIDs via ListSatisfiedEntries with no tenant_id filter",
+    "severity": "medium",
+    "cvss": 4.3,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:40:46Z"
+  },
+  "CVE-2026-84298": {
+    "ghsa_id": "GHSA-9q4h-f4x5-ffq8",
+    "summary": "Hatchet: Cross-tenant durable callback payload disclosure in Hatchet V1 Dispatcher",
+    "severity": "low",
+    "cvss": 3.1,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:40:43Z"
+  },
+  "CVE-2026-79913": {
+    "ghsa_id": "GHSA-jvh5-97xg-v99f",
+    "summary": "Cloudreve: SSRF guard bypass: checkIP does not decode IPv6-transition wrappers (NAT64, IPv4-compatible, 6to4) reaching internal and cloud-metadata addresses",
+    "severity": "medium",
+    "cvss": 6.5,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:40:41Z"
+  },
+  "CVE-2026-79767": {
+    "ghsa_id": "GHSA-gfjv-gqf2-c888",
+    "summary": "Gardener: Authorization Bypass via Group Subject Injection",
+    "severity": "medium",
+    "cvss": 5.5,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:40:38Z"
+  },
+  "CVE-2026-77637": {
+    "ghsa_id": "GHSA-w89x-c962-c44g",
+    "summary": "Cloudreve: Privilege Scope Bypass: State-Mutating Admin Operations Accessible via Read-Only OAuth Scope",
+    "severity": "low",
+    "cvss": 3.8,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:40:35Z"
+  },
+  "CVE-2026-77633": {
+    "ghsa_id": "GHSA-xj3h-wwxq-gfcj",
+    "summary": "Cloudreve: Storage-quota TOCTOU race allows quota bypass and storage-based denial of service",
+    "severity": "high",
+    "cvss": 7.1,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:40:33Z"
+  },
+  "CVE-2026-94462": {
+    "ghsa_id": "GHSA-4825-p4xm-pcf2",
+    "summary": "Spree: Broken Access Control in `PATCH /api/v3/store/carts/:id/associate` (IDOR)",
+    "severity": "high",
+    "cvss": 7.1,
+    "ecosystem": "rubygems",
+    "published": "2026-09-22T20:40:30Z"
+  },
+  "CVE-2026-86062": {
+    "ghsa_id": "GHSA-xpjq-3w4w-w5wr",
+    "summary": "lightrag-hku: Stored Cross-Site Scripting (XSS) in the LightRAG WebUI chat/answer renderer via ingested content",
+    "severity": "medium",
+    "cvss": 6.1,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:40:27Z"
+  },
+  "CVE-2026-85740": {
+    "ghsa_id": "GHSA-vv3m-f8x4-7377",
+    "summary": "lightrag-hku: SSRF via IPv6-transition address bypass (NAT64, IPv4-compatible, 6to4) of the native-markdown image-download guard",
+    "severity": "high",
+    "cvss": 7.1,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:40:25Z"
+  },
+  "CVE-2026-85734": {
+    "ghsa_id": "GHSA-frch-4w6v-q5xx",
+    "summary": "lightrag-hku: No Rate Limiting on /login Endpoint Allows Brute-Force Attacks",
+    "severity": "critical",
+    "cvss": 9.1,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:40:22Z"
+  },
+  "CVE-2026-85725": {
+    "ghsa_id": "GHSA-c759-cx9p-mrwq",
+    "summary": "lightrag-hku: Plaintext Passwords Compared Without Constant-Time Function",
+    "severity": "medium",
+    "cvss": 5.9,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:40:19Z"
+  },
+  "CVE-2026-85709": {
+    "ghsa_id": "GHSA-hrmj-7rvj-4hg8",
+    "summary": "lightrag-hku: Sensitive Information Exposure Through Raw Exception Messages in API Error Responses",
+    "severity": "medium",
+    "cvss": 5.3,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:37:36Z"
+  },
+  "CVE-2026-83805": {
+    "ghsa_id": "GHSA-q4c5-2j6f-r476",
+    "summary": "Nautobot: Authorization bypass in approval workflow REST API allows self-approval and unauthorized activation of scheduled jobs",
+    "severity": "medium",
+    "cvss": 6.4,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:37:33Z"
+  },
+  "CVE-2026-83801": {
+    "ghsa_id": "GHSA-56v6-2fhr-wxgq",
+    "summary": "Nautobot: Stored cross-site scripting (XSS) in object create/edit form help text",
+    "severity": "medium",
+    "cvss": 5.4,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:37:30Z"
+  },
+  "CVE-2026-77528": {
+    "ghsa_id": "GHSA-hxp9-w8x3-p566",
+    "summary": "Autobahn Python permessage-deflate bypasses maxMessagePayloadSize after inflation",
+    "severity": "medium",
+    "cvss": 5.3,
+    "ecosystem": "pip",
+    "published": "2026-09-22T20:37:28Z"
+  },
+  "CVE-2026-76805": {
+    "ghsa_id": "GHSA-jpvm-9frm-hjcq",
+    "summary": "Nuclei: Environment Variable Disclosure via Response-Derived Data in DAST/Fuzz Mode",
+    "severity": "medium",
+    "cvss": 5.3,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:37:24Z"
+  },
+  "CVE-2026-76804": {
+    "ghsa_id": "GHSA-qgw5-7j4f-fg97",
+    "summary": "Nuclei: Local File Read via Workflow File-Protocol Gate Bypass",
+    "severity": "medium",
+    "cvss": 5.5,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:37:21Z"
+  },
+  "CVE-2026-76803": {
+    "ghsa_id": "GHSA-xhmx-w2j4-rw3q",
+    "summary": "Nuclei: Local File Read via MySQL Client Sandbox Bypass",
+    "severity": "medium",
+    "cvss": 5.3,
+    "ecosystem": "go",
+    "published": "2026-09-22T20:37:19Z"
+  }
+}
