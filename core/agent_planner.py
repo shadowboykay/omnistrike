@@ -5,8 +5,8 @@ from core.loader import ModuleLoader
 class AgentPlanner:
     PLANS = {
         "recon": [("recon","waf_detect"), ("recon","tech_fingerprint"),
-                  ("recon","cms_detect"), ("recon","crt_sh"),
-                  ("recon","sitemap"), ("recon","robots")],
+                  ("web","cms_detect"),
+                   ("recon","robots")],
         "web_scan": [("recon","waf_detect"), ("web","cors"), ("web","csp"),
                      ("web","cookie"), ("web","swagger"), ("web","api_leak"),
                      ("web","jwt"), ("web","xss"), ("web","sqli"), ("web","lfi")],
