@@ -16,3 +16,4 @@ __pycache__/
 _tmp_seclists/
 .env
 .DS_Store
+templates/

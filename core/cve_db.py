@@ -2,6 +2,8 @@
 import json, time, os, gzip
 from pathlib import Path
 import requests
+import urllib3
+urllib3.disable_warnings()
 
 DATA_DIR = Path(__file__).parent.parent / "data" / "cve"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
