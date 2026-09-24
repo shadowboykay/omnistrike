@@ -49,12 +49,18 @@ class SpreadEngine:
         "hosts":           ["scan_hosts"],
     }
 
-    def __init__(self, session, logger, loader, max_depth=3, max_actions=30):
+    def __init__(self, session, logger, loader, max_depth=3, max_actions=30,
+                 pause_after_finding=False, no_auto_move=False, strict_scope=True):
         self.session = session
         self.logger = logger
         self.loader = loader
         self.max_depth = max_depth
         self.max_actions = max_actions
+        # safety controls
+        self.pause_after_finding = pause_after_finding  # stop after each hit
+        self.no_auto_move = no_auto_move  # don't run chains, only report
+        self.strict_scope = strict_scope  # only same-host, no external hosts
+        self.decision_log = []  # audit of every decision
         self.depth = 0
         self.actions_taken = 0
         self.visited = set()  # (target, kind, action)
@@ -96,7 +102,29 @@ class SpreadEngine:
             if key in self.visited:
                 continue
             self.visited.add(key)
+
+            # audit decision
+            decision = {
+                "from_kind": kind,
+                "action": f"{cat}/{mod}",
+                "target": self.session.target,
+                "allowed": not self.no_auto_move,
+            }
+            self.decision_log.append(decision)
+
+            if self.no_auto_move:
+                print(f"    [spread] WOULD run {cat}/{mod} (no_auto_move=True)", flush=True)
+                continue
+
             self._run_action(cat, mod, reason=f"chain from {kind}")
+
+            if self.pause_after_finding:
+                print(f"    [spread] PAUSED after finding: {kind}", flush=True)
+                print(f"    [spread] press Enter to continue, Ctrl+C to stop", flush=True)
+                try:
+                    input()
+                except (EOFError, KeyboardInterrupt):
+                    raise KeyboardInterrupt
 
     def on_dump_complete(self, dump_result):
         """Called by dump modules after extracting data."""
@@ -311,6 +339,12 @@ class SpreadEngine:
             "hosts": len(self.artifacts["hosts"]),
             "admin_access": self.artifacts["admin_access"],
             "chains": self.triggered_chains,
+            "decisions": len(self.decision_log),
+            "safety": {
+                "pause_after_finding": self.pause_after_finding,
+                "no_auto_move": self.no_auto_move,
+                "strict_scope": self.strict_scope,
+            },
         }
 
 
