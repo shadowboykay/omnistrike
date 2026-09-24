@@ -1,50 +1,54 @@
-"""xss — reflected XSS scanner: raw echo + context break detection, payloads from core.payloads"""
+"""xss — reflected XSS scanner with baseline, mutation, FP-filter (v2)"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.http import HttpClient
+from core.probe import Probe
 from core.payloads import get
 
 MARKER = "omni7x9z"
 
+
 class Xss:
     def run(self, session, logger):
         target = session.target
-        http = HttpClient(session, logger)
         u = urlparse(target)
         params = parse_qs(u.query) or {"q": ["test"]}
 
-        payloads = get("xss", limit=200, mutate_by=1)
-        print(f"[xss] {len(payloads)} payloads on {list(params.keys())}")
+        probe = Probe(session, logger)
+        base = probe.baseline_probe(target)
+        if not base:
+            print("[xss] no baseline — target unreachable")
+            return {"findings": []}
+        print(f"[xss] baseline: {base['code']} {base['len']}b")
+
+        payloads = get("xss", limit=120, mutate_by=0)
+        print(f"[xss] {len(payloads)} payloads on params {list(params.keys())}")
+
         findings = []
 
-        # baseline reflection length
-        base = http.get(target)
-        base_len = len(base.content) if base else 0
-
         for name in params:
-            for p in payloads:
-                test = p.replace("alert(1)", f'alert("{MARKER}")').replace("alert`1`", f'alert`{MARKER}`')
-                q = dict(params); q[name] = [test]
-                url = urlunparse(u._replace(query=urlencode(q, doseq=True)))
-                r = http.get(url)
-                if not r: continue
-                body = r.text
+            print(f"\n[xss] param '{name}'")
+            for i, p in enumerate(payloads, 1):
+                # inject marker for tracking
+                test = p.replace("alert(1)", f'alert("{MARKER}")')
+                url_fn = lambda pl, u=u, params=params, name=name: urlunparse(
+                    u._replace(query=urlencode({**{k: v[0] for k, v in params.items()}, name: pl}, doseq=True))
+                )
+                r = probe.inject(url_fn, test, detect_markers=[MARKER])
+                if r["hit"]:
+                    print(f"  ✓ {r['reason']} — {test[:60]}")
+                    findings.append({
+                        "param": name,
+                        "payload": test,
+                        "type": r["reason"],
+                        "severity": "high" if "raw" in r["reason"] else "medium",
+                    })
+                    logger.finding("xss", "high" if "raw" in r["reason"] else "medium",
+                                   f"{name}={test[:60]} ({r['reason']})")
+                elif i % 30 == 0:
+                    print(f"  · {i}/{len(payloads)} done, {len(findings)} hits so far")
 
-                # raw reflection
-                if test in body:
-                    findings.append({"param":name,"payload":test,"type":"raw"})
-                    print(f"  [!] RAW: {name} | {test[:60]}")
-                    logger.finding("xss_raw","medium",f"{name}={test[:80]}")
-                # unescaped (marker present + no encoding)
-                elif MARKER in body and "<" in test and "<" in body:
-                    findings.append({"param":name,"payload":test,"type":"unescaped"})
-                    print(f"  [!] UNESCAPED: {name} | {test[:60]}")
-                    logger.finding("xss_unescaped","high",f"{name}={test[:80]}")
-                # escaped markers only
-                elif MARKER in body:
-                    findings.append({"param":name,"payload":test,"type":"reflected_escaped"})
-                    logger.finding("xss_reflect","low",f"{name} reflected escaped")
+        stats = probe.summary()
+        print(f"\n[xss] total findings: {len(findings)}")
+        print(f"[xss] stats: req={stats['requests']} blocks={stats['blocks']} mutations={stats['mutations']}")
 
-                if len(findings) > 30: break
-
-        print(f"[xss] done: {len(findings)}")
-        return {"findings": findings}
+        return {"findings": findings, "stats": stats}

@@ -49,10 +49,15 @@ _MUTATORS = [
 ]
 
 
-def mutate_param(value, n=6):
-    """Return up to n mutated variants of a query parameter value."""
+def mutate_param(value, n=6, base_first=True):
+    """
+    Return up to n mutated variants of a query parameter value.
+    base_first: if True, original value is included first.
+    """
     out = []
     seen = {value}
+    if base_first:
+        out.append(value)
     for _ in range(n * 3):
         if len(out) >= n:
             break
