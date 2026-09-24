@@ -2,20 +2,10 @@
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.http import HttpClient
 from core.probe import Probe
+from core.payload_source import get_payloads
 
 # CRLF variants
-CRLF_PAYLOADS = [
-    "value%0d%0aInjected-Header:yes",
-    "value%0aInjected-Header:yes",
-    "value%0dInjected-Header:yes",
-    "value\r\nInjected-Header:yes",
-    "value%0d%0a%0d%0a<html>splitting</html>",
-    "value%0d%0aSet-Cookie:sess=injected",
-    "value%23%0d%0aInjected-Header:yes",
-    "value%250d%250aInjected-Header:yes",  # double-encoded
-    "value%0d%0aLocation:https://evil.attacker.example",
-    "value%0d%0aContent-Length:0%0d%0a%0d%0aHTTP/1.1 200 OK",
-]
+CRLF_PAYLOADS = get_payloads("crlf")
 
 # injection points
 HEADERS = ["X-Forwarded-For", "X-Forwarded-Host", "X-Real-IP", "Referer",

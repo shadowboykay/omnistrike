@@ -18,14 +18,14 @@ CONTEXT_FILES = {
     "ssrf":        ["seclists_ssrf.txt"],
     "redirect":    ["open_redirect.txt", "seclists_open_redirect.txt"],
     "cmd":         ["cmd_injection.txt"],
-    "ldap":        [],  # builtin in module
-    "xslt":        [],  # builtin in module
-    "csti":        [],  # builtin in module
+    "ldap":        ["ldap.txt"],
+    "xslt":        ["xslt.txt"],
+    "csti":        ["csti.txt"],
     "ssi":         ["ssi_injection.txt"],
-    "crlf":        [],  # builtin
-    "nosql":       [],  # builtin
-    "saml":        [],  # builtin
-    "oauth":       [],  # builtin
+    "crlf":        ["crlf.txt"],
+    "nosql":       ["nosql.txt"],
+    "saml":        [],
+    "oauth":       [],
 }
 
 # built-in fallbacks if file is empty or missing

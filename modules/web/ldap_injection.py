@@ -1,10 +1,9 @@
 """ldap_injection — LDAP filter injection probe"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.probe import Probe
+from core.payload_source import get_payloads
 
-PAYLOADS = ["*", "*)(&", "*)(|(&", "*)(uid=*))(|(uid=*", "admin*",
-            "admin*)((|userPassword=*)", "*)(objectClass=*",
-            "x)(|(cn=*", "x)(|(objectClass=*", "\\2a", "\\28", "\\29", "\\00"]
+PAYLOADS = get_payloads("ldap", limit=40)
 MARKERS = [
     "javax.naming.NameNotFoundException",
     "javax.naming.directory.InvalidSearchFilterException",

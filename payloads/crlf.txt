@@ -1,0 +1,12 @@
+test%0d%0aInjected-Header:yes
+test%0aInjected-Header:yes
+test%0dInjected-Header:yes
+test%0d%0a%0d%0a<html>injected</html>
+test%23%0d%0aInjected-Header:yes
+test%0d%0aSet-Cookie:crlftest=1
+%0d%0aInjected-Header:yes
+test%250d%250aInjected-Header:yes
+%0a%0aInjected-Header:yes
+test%0d%0aLocation:https://evil.example
+%0d%0aContent-Length:0%0d%0a%0d%0aHTTP/1.1 200 OK
+test%0d%0aInjected-Header:%20yes

