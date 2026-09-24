@@ -7,17 +7,17 @@ PAYLOAD_DIR = Path(__file__).parent.parent / "payloads"
 
 # mapping: module context -> payload files
 CONTEXT_FILES = {
-    "sql":         ["sqli.txt", "seclists_sqli.txt", "seclists_sqli_all.txt", "seclists_sqli_quick.txt"],
+    "sql":         ["sqli.txt", "seclists_sqli.txt", "seclists_sqli_all.txt", "seclists_sqli_quick.txt", "sqli_auto.txt", "sqli_auto2.txt", "sqli_fuzzdb2.txt"],
     "sql_waf":     ["waf_cloudflare.txt", "waf_akamai.txt", "waf_imperva.txt", "encoded_composite.txt"],
-    "html_body":   ["xss_context.txt", "xss.txt"],
+    "html_body":   ["xss_context.txt", "xss.txt", "xss_auto.txt", "xss_auto2.txt", "xss_fuzzdb.txt"],
     "html_waf":    ["waf_cloudflare.txt", "waf_akamai.txt", "waf_imperva.txt", "encoded_composite.txt"],
-    "path":        ["lfi.txt", "seclists_lfi.txt"],
+    "path":        ["lfi.txt", "seclists_lfi.txt", "lfi_auto.txt"],
     "path_waf":    ["waf_cloudflare.txt", "encoded_composite.txt"],
     "template":    ["ssti.txt", "ssti_extra.txt"],
-    "xml":         ["xxe.txt", "seclists_xxe.txt"],
-    "ssrf":        ["seclists_ssrf.txt"],
+    "xml":         ["xxe.txt", "seclists_xxe.txt", "xxe_auto.txt"],
+    "ssrf":        ["seclists_ssrf.txt", "ssrf_auto.txt", "ssrf_swissky.txt"],
     "redirect":    ["open_redirect.txt", "seclists_open_redirect.txt"],
-    "cmd":         ["cmd_injection.txt"],
+    "cmd":         ["cmd_injection.txt", "cmd_auto.txt"],
     "ldap":        ["ldap.txt"],
     "xslt":        ["xslt.txt"],
     "csti":        ["csti.txt"],
