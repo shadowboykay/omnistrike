@@ -2,7 +2,7 @@
 import time
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.probe import Probe
-from core.payloads import get
+from core.payload_source import get_payloads, detect_waf
 
 ERROR_MARKERS = [
     "sql syntax", "mysql_fetch", "mysqli", "pg_query", "pg_exec", "sqlite3",
@@ -25,11 +25,9 @@ class Sqli:
         if not base:
             print("[sqli] no baseline"); return {"findings": []}
         print(f"[sqli] baseline: {base['code']} {base['len']}b")
-
-        waf = any(f.get("kind") == "waf" for f in session.findings)
-        error_p = get("sqli", limit=30 if waf else 50, mutate_by=0)
-        time_p  = [x for x in get("sqli", mutate_by=0)
-                   if any(k in x.lower() for k in ("sleep", "waitfor", "pg_sleep", "benchmark"))][:5]
+        all_p = get_payloads("sql", waf=detect_waf(session), limit=80)
+        error_p = all_p[:60]
+        time_p = [x for x in all_p if any(k in x.lower() for k in ("sleep","waitfor","pg_sleep","benchmark"))][:5]
 
         print(f"[sqli] {len(error_p)} error, {len(time_p)} time payloads")
 

@@ -163,3 +163,45 @@ mutate = mutate_param
 
 # compat alias for probe (older name)
 mutate = mutate_param
+
+
+# ============ context-aware payload selection ============
+
+def get_context_payloads(context, waf=None):
+    """Return payloads for a context + optional WAF."""
+    from pathlib import Path
+    base = Path(__file__).parent.parent / "payloads"
+    files = []
+    if context in ("html_body", "html_attr"):
+        files.append("xss_context.txt")
+    elif context == "sql":
+        files.append("sqli.txt")
+    elif context == "path":
+        files.append("lfi.txt")
+    if waf == "cloudflare":
+        files.append("waf_cloudflare.txt")
+    elif waf == "akamai":
+        files.append("waf_akamai.txt")
+    elif waf == "imperva":
+        files.append("waf_imperva.txt")
+    files.append("encoded_composite.txt")
+
+    out = []
+    for fname in files:
+        p = base / fname
+        if p.is_file():
+            for line in p.read_text(errors="ignore").splitlines():
+                s = line.strip()
+                if s and not s.startswith("#"):
+                    out.append(s)
+    return list(dict.fromkeys(out))
+
+
+def detect_waf_from_headers(headers):
+    h = str(headers).lower()
+    if "cloudflare" in h or "cf-ray" in h: return "cloudflare"
+    if "akamai" in h or "x-akamai" in h: return "akamai"
+    if "imperva" in h or "incap_ses" in h: return "imperva"
+    if "sucuri" in h: return "sucuri"
+    if "awselb" in h or "x-amzn" in h: return "aws"
+    return None

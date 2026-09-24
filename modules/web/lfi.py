@@ -1,7 +1,7 @@
 """lfi — LFI scanner on Probe v2: baseline + verify + auto-dump + escalate"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.probe import Probe
-from core.payloads import get
+from core.payload_source import get_payloads, detect_waf
 
 MARKERS = [
     "root:x:0:0", "daemon:x:", "bin:x:", "nobody:x:", "sys:x:",
@@ -25,7 +25,7 @@ class Lfi:
             print("[lfi] no baseline"); return {"findings": []}
         print(f"[lfi] baseline: {base['code']} {base['len']}b")
 
-        payloads = get("lfi", limit=150, mutate_by=0)
+        payloads = get_payloads("path", waf=detect_waf(session), limit=200)
         print(f"[lfi] {len(payloads)} payloads on {list(params.keys())}")
 
         findings = []

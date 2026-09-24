@@ -2,7 +2,7 @@
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.http import HttpClient
 from core.probe import Probe
-from core.payloads import get
+from core.payload_source import get_payloads, detect_waf
 
 MARKER = "omni7x9z"
 
@@ -20,7 +20,7 @@ class Xss:
             return {"findings": []}
         print(f"[xss] baseline: {base['code']} {base['len']}b")
 
-        payloads = get("xss", limit=120, mutate_by=0)
+        payloads = get_payloads("html_body", waf=detect_waf(session), limit=150)
         print(f"[xss] {len(payloads)} payloads on params {list(params.keys())}")
 
         findings = []

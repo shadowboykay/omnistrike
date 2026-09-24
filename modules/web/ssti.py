@@ -1,7 +1,7 @@
 """ssti — SSTI scanner on Probe v2 with verify"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.probe import Probe
-from core.payloads import get
+from core.payload_source import get_payloads
 
 EXPECT = [
     ("{{7*7}}", "49"), ("{{7*'7'}}", "7777777"), ("${7*7}", "49"),
@@ -22,7 +22,7 @@ class Ssti:
             print("[ssti] no baseline"); return {"findings": []}
         print(f"[ssti] baseline: {base['code']} {base['len']}b")
 
-        payloads = get("ssti", limit=80, mutate_by=0)
+        payloads = get_payloads("template", limit=120)
         print(f"[ssti] {len(payloads)} payloads on {list(params.keys())}")
 
         findings = []

