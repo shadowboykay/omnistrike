@@ -9,6 +9,27 @@ import urllib.request, urllib.parse
 LOG_DIR = Path(__file__).parent / "proxy_logs"
 LOG_DIR.mkdir(exist_ok=True)
 
+MAX_LOG_SIZE = 50 * 1024 * 1024
+MAX_LOG_AGE_DAYS = 7
+
+
+def rotate_logs():
+    """Remove old logs or truncate large ones."""
+    import time
+    now = time.time()
+    for log in LOG_DIR.glob("*.jsonl"):
+        try:
+            if (now - log.stat().st_mtime) / 86400 > MAX_LOG_AGE_DAYS:
+                log.unlink()
+                print(f"[proxy] removed old: {log.name}")
+                continue
+            if log.stat().st_size > MAX_LOG_SIZE:
+                lines = log.read_text().splitlines()
+                log.write_text("\n".join(lines[-1000:]) + "\n")
+                print(f"[proxy] truncated: {log.name}")
+        except Exception:
+            pass
+
 
 class ProxyHandler(http.server.BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
@@ -119,6 +140,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
 
 
 def run(port=8080, interactive=False, edit=False):
+    rotate_logs()
     ProxyHandler.interactive = interactive
     ProxyHandler.edit_enabled = edit
 

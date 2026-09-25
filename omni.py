@@ -81,6 +81,19 @@ def cmd_run(args):
 
     # PDF mode
     reporter.write(result)
+    # state save (resume support)
+    try:
+        from core.state import save as save_state
+        save_state(session, f"{args.category}/{args.module}")
+    except Exception:
+        pass
+    # junit
+    if getattr(args, "junit", False):
+        try:
+            from core.junit import generate as junit_gen
+            junit_gen(session)
+        except Exception as e:
+            print(f"[junit] {e}")
     if getattr(args, "sarif", False):
         try:
             from core.sarif import generate as sarif_gen
@@ -127,6 +140,8 @@ def main():
     pr.add_argument("--pdf", action="store_true")
     pr.add_argument("--sarif", action="store_true")
     pr.add_argument("--ci", action="store_true")
+    pr.add_argument("--junit", action="store_true")
+    pr.add_argument("--resume", action="store_true")
 
     pc = sub.add_parser("chain")
     pc.add_argument("name", choices=list(CHAINS.keys()))

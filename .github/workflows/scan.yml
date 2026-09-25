@@ -1,0 +1,41 @@
+name: OmniStrike Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target URL'
+        required: true
+        default: 'http://demo.testfire.net/'
+      module:
+        description: 'category/module'
+        required: true
+        default: 'recon/waf_detect'
+  push:
+    branches: [main]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests urllib3
+      - name: Scan
+        continue-on-error: true
+        run: |
+          TARGET="${{ inputs.target || 'http://demo.testfire.net/' }}"
+          MODULE="${{ inputs.module || 'recon/waf_detect' }}"
+          CAT=$(echo $MODULE | cut -d/ -f1)
+          MOD=$(echo $MODULE | cut -d/ -f2)
+          python omni.py run $CAT $MOD --target "$TARGET" --ci > scan.json || true
+          cat scan.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results
+          path: |
+            reports/
+            scan.json
