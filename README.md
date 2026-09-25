@@ -2,9 +2,10 @@
 
 ![status](https://img.shields.io/badge/status-active-brightgreen)
 ![python](https://img.shields.io/badge/python-3.11+-blue)
-![modules](https://img.shields.io/badge/modules-195-orange)
+![modules](https://img.shields.io/badge/modules-178-orange)
 ![templates](https://img.shields.io/badge/templates-14060-purple)
 ![license](https://img.shields.io/badge/license-MIT-green)
+![tests](https://img.shields.io/badge/tests-7%20passing-brightgreen)
 
 **Modular pentest framework for Termux and Linux.**
 195+ modules across 12 categories, 14060 Nuclei templates, KEV/ExploitDB/GHSA CVE cache, Burp-lite proxy, Flask web UI, SARIF/JUnit/PDF reports.
