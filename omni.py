@@ -43,6 +43,9 @@ def cmd_run(args):
     except Exception as e:
         logger.error("crash", error=str(e)); print(f"[!] {type(e).__name__}: {e}"); sys.exit(2)
     reporter.write(result)
+    if getattr(args, "pdf", False):
+        from core.report_pdf import generate
+        generate(session, logger)
 
 
 def cmd_chain(args):
@@ -67,6 +70,7 @@ def main():
     pr.add_argument("--threads", type=int, default=10)
     pr.add_argument("--output","-o", default=None)
     pr.add_argument("--extra","-x", action="append", default=[])
+    pr.add_argument("--pdf", action="store_true")
 
     pc = sub.add_parser("chain")
     pc.add_argument("name", choices=list(CHAINS.keys()))

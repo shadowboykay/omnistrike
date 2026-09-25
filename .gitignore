@@ -17,3 +17,5 @@ _tmp_seclists/
 .env
 .DS_Store
 templates/
+proxy_logs/
+web_runs/
