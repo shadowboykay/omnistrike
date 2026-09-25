@@ -81,6 +81,12 @@ def cmd_run(args):
 
     # PDF mode
     reporter.write(result)
+    if getattr(args, "sarif", False):
+        try:
+            from core.sarif import generate as sarif_gen
+            sarif_gen(session)
+        except Exception as e:
+            print(f"[sarif] {e}")
     if getattr(args, "pdf", False):
         try:
             from core.report_pdf import generate
@@ -119,6 +125,7 @@ def main():
     pr.add_argument("--output","-o", default=None)
     pr.add_argument("--extra","-x", action="append", default=[])
     pr.add_argument("--pdf", action="store_true")
+    pr.add_argument("--sarif", action="store_true")
     pr.add_argument("--ci", action="store_true")
 
     pc = sub.add_parser("chain")

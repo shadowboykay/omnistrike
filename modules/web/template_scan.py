@@ -1,6 +1,6 @@
 """template_scan — Nuclei-compatible template runner"""
 from core.http import HttpClient
-from core.template_engine import load_template, match_template
+from core.template_engine_v2 import load_template_v2 as load_template, match_template_v2 as match_template
 from pathlib import Path
 import random
 
