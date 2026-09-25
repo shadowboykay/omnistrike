@@ -1,22 +1,14 @@
-"""subdomain_brute — DNS subdomain enumeration via wordlist + wildcard filter"""
+"""subdomain_brute — DNS enumeration with wordlist_mgr integration (20000+ words)"""
 import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-DEFAULT_WORDLIST = [
-    "www","mail","ftp","webmail","smtp","pop","ns1","ns2","ns3","dev","test","stage",
-    "staging","api","app","admin","portal","blog","shop","store","cdn","static","assets",
-    "img","images","media","video","download","uploads","files","docs","doc","wiki","help",
-    "support","status","monitor","metrics","grafana","kibana","prometheus","jenkins","ci",
-    "git","gitlab","github","bitbucket","jira","confluence","nexus","registry","docker",
-    "k8s","kubernetes","vpn","remote","rdp","ssh","db","database","mysql","postgres","redis",
-    "mongo","elastic","cache","queue","mq","kafka","rabbit","backup","bak","old","new",
-    "v1","v2","v3","beta","alpha","demo","sandbox","preview","qa","uat","prod","prod2",
-    "internal","intranet","extranet","corp","office","mail2","webdisk","cpanel","whm",
-    "autodiscover","autoconfig","m","mobile","wap","secure","ssl","login","auth","sso",
-    "oauth","id","account","accounts","pay","payment","billing","invoice","crm","erp",
-    "hr","jobs","careers","recruit","learn","edu","training","events","news","press",
-    "forum","community","chat","meet","zoom","teams","calendar","drive","cloud","storage",
+
+# fallback small list if wordlists not downloaded
+FALLBACK = [
+    "www","mail","ftp","smtp","ns1","ns2","api","app","admin","dev","test",
+    "stage","staging","blog","shop","cdn","static","assets","images","media",
+    "git","gitlab","jenkins","jira","confluence","vpn","remote","db","mysql",
 ]
 
 
@@ -29,36 +21,58 @@ def resolve(host):
 
 class SubdomainBrute:
     def run(self, session, logger):
-        domain = session.target.replace("https://", "").replace("http://", "").split("/")[0]
-        wordlist_path = None
+        domain = session.target.replace("https://", "").replace("http://", "").split("/")[0].split(":")[0]
+
+        # 1. try wordlist_mgr
+        words = []
+        try:
+            from core.wordlist_mgr import load
+            words = load("subdomains")
+            print(f"[subdomain] loaded {len(words)} from wordlist_mgr")
+        except Exception:
+            pass
+
+        # 2. custom via --extra wordlist=
         for x in session.extra:
             if x.startswith("wordlist="):
-                wordlist_path = x.split("=", 1)[1]
+                p = Path(x.split("=", 1)[1])
+                if p.is_file():
+                    words = [l.strip() for l in p.read_text().splitlines() if l.strip()]
+                    print(f"[subdomain] custom wordlist: {len(words)}")
 
-        if wordlist_path and Path(wordlist_path).is_file():
-            words = [l.strip() for l in Path(wordlist_path).read_text().splitlines() if l.strip()]
-        else:
-            words = DEFAULT_WORDLIST
+        # 3. fallback
+        if not words:
+            words = FALLBACK
+            print(f"[subdomain] using fallback: {len(words)} words")
 
-        logger.info("brute_start", domain=domain, count=len(words))
-        print(f"[subdomain] {domain} — {len(words)} words, {session.threads} threads")
+        # limit if too many
+        limit = 20000
+        for x in session.extra:
+            if x.startswith("limit="):
+                limit = int(x.split("=", 1)[1])
+        words = words[:limit]
 
-        # wildcard check
-        wildcard_ip = None
-        _, wildcard_ip = resolve(f"this-does-not-exist-{hash(domain) & 0xffff}.{domain}")
+        print(f"[subdomain] {domain}, {len(words)} words, {session.threads} threads")
+        print(f"[subdomain] wildcard check...")
+
+        # wildcard
+        _, wildcard_ip = resolve(f"this-does-not-exist-{abs(hash(domain)) & 0xffff}.{domain}")
         if wildcard_ip:
+            print(f"[subdomain] ⚠ wildcard DNS -> {wildcard_ip}")
             logger.warn("wildcard_dns", ip=wildcard_ip)
-            print(f"[subdomain] [!] wildcard DNS -> {wildcard_ip}, filtering")
 
         found = []
         with ThreadPoolExecutor(max_workers=session.threads) as ex:
             futs = {ex.submit(resolve, f"{w}.{domain}"): w for w in words}
-            for fut in as_completed(futs):
+            for i, fut in enumerate(as_completed(futs), 1):
                 host, ip = fut.result()
                 if ip and ip != wildcard_ip:
                     found.append((host, ip))
-                    print(f"  [+] {host:40s} {ip}")
+                    print(f"  + {host:40s} {ip}")
                     logger.finding("subdomain", "info", f"{host} -> {ip}")
+                if i % 500 == 0:
+                    print(f"    ... {i}/{len(words)} ({len(found)} found)")
 
-        print(f"[subdomain] done: {len(found)} found")
-        return {"domain": domain, "found": [{"host": h, "ip": i} for h, i in found]}
+        print(f"[subdomain] done: {len(found)}/{len(words)} found")
+        return {"domain": domain, "found": [{"host": h, "ip": i} for h, i in found],
+                "total_words": len(words)}

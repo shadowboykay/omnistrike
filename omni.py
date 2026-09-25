@@ -27,6 +27,7 @@ def cmd_run(args):
     module = loader.load(args.category, args.module)
     if not module:
         print(f"[!] module '{args.category}/{args.module}' not found"); sys.exit(1)
+
     session = Session(
         target=args.target, proxy=args.proxy, timeout=args.timeout,
         user_agent=args.ua, threads=args.threads, output=args.output,
@@ -34,18 +35,65 @@ def cmd_run(args):
     )
     logger = Logger(session)
     reporter = Reporter(session, logger)
+
+    # spread engine
+    spread_engine = None
+    if getattr(args, "spread", False):
+        try:
+            from core.spread import attach
+            spread_engine = attach(session, logger, loader)
+            print("[omni] spread engine enabled")
+        except Exception as e:
+            print(f"[spread] {e}")
+
     print(f"[omni] {args.category}/{args.module} -> {args.target}")
     logger.info("start", category=args.category, module=args.module, target=args.target)
+
     try:
         result = module.run(session, logger)
     except KeyboardInterrupt:
-        print("\n[!] interrupted"); logger.warn("interrupted"); sys.exit(130)
+        print("\n[!] interrupted")
+        logger.warn("interrupted")
+        sys.exit(130)
     except Exception as e:
-        logger.error("crash", error=str(e)); print(f"[!] {type(e).__name__}: {e}"); sys.exit(2)
+        logger.error("crash", error=str(e))
+        print(f"[!] {type(e).__name__}: {e}")
+        sys.exit(2)
+
+    # CI MODE — JSON output + exit code by severity
+    if getattr(args, "ci", False):
+        import json as _json
+        counts = {}
+        for f in session.findings:
+            sev = f.get("severity", "info")
+            counts[sev] = counts.get(sev, 0) + 1
+        print(_json.dumps({
+            "target": session.target,
+            "module": f"{args.category}/{args.module}",
+            "counts": counts,
+            "findings": session.findings,
+        }, indent=2, default=str))
+        if counts.get("critical", 0) > 0:
+            sys.exit(2)
+        elif counts.get("high", 0) > 0:
+            sys.exit(1)
+        sys.exit(0)
+
+    # PDF mode
     reporter.write(result)
     if getattr(args, "pdf", False):
-        from core.report_pdf import generate
-        generate(session, logger)
+        try:
+            from core.report_pdf import generate
+            generate(session, logger)
+        except Exception as e:
+            print(f"[pdf] {e}")
+
+    # spread summary
+    if spread_engine:
+        print("\n[spread] summary:")
+        for k, v in spread_engine.summary().items():
+            print(f"  {k}: {v}")
+
 
 
 def cmd_chain(args):
@@ -71,6 +119,7 @@ def main():
     pr.add_argument("--output","-o", default=None)
     pr.add_argument("--extra","-x", action="append", default=[])
     pr.add_argument("--pdf", action="store_true")
+    pr.add_argument("--ci", action="store_true")
 
     pc = sub.add_parser("chain")
     pc.add_argument("name", choices=list(CHAINS.keys()))
