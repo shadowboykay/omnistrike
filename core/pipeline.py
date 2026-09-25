@@ -11,7 +11,7 @@ from core.report import Reporter
 # ============ recon chain ============
 CHAIN_RECON = [
     "crt_sh", "subdomain_brute", "dns", "dns_zone_transfer", "waf_detect",
-    "tech_fingerprint", "cms_detect", "robots", "sitemap", "wayback", "dorks",
+    "tech_fingerprint", "robots", "sitemap", "wayback", "dorks",
     "email_harvest", "favicon", "shodan_query",
 ]
 
@@ -23,7 +23,7 @@ CHAIN_WEB = [
     "cms_detect", "wpscan_lite",
     # logic
     "http_404", "open_redirect", "idor", "mass_assignment", "race_condition",
-    "hpp", "prototype_pollution", "http_method_override", "cache_deception",
+    "hpp", "http_method_override", "cache_deception",
     "ssi_injection", "websocket", "websocket_fuzz",
     # auth
     "jwt", "jwt_bypass", "saml_attack", "oauth_misconfig",
@@ -40,24 +40,23 @@ CHAIN_WEB = [
 # ============ bypass chain ============
 CHAIN_BYPASS = [
     "waf_evasion", "rate_limit", "403_bypass", "host_header",
-    "cache_poison", "smuggling", "h2c_smuggling", "encoding",
+    "cache_poison", "smuggling", "encoding",
 ]
 
 # ============ evasion chain ============
 CHAIN_EVASION = [
     "googlebot_spoof", "header_full_spoof", "ua_rotate", "referer_chain",
-    "header_spoof", "http_method_override", "dns_over_https",
-    "request_timing", "delay_jitter",
+    "header_spoof", "dns_over_https", "request_timing", "delay_jitter",
 ]
 
 # ============ cloud chain ============
-CHAIN_CLOUD = ["s3_bucket", "azure_blob", "gcp_storage", "cloudflare_origin", "kubernetes_api"]
+CHAIN_CLOUD = ["azure_blob", "gcp_storage", "cloudflare_origin", "kubernetes_api"]
 
 # ============ osint chain ============
-CHAIN_OSINT = ["domain", "ip", "asn_lookup", "email", "username", "urlscan"]
+CHAIN_OSINT = ["domain", "ip", "email", "username"]
 
 # ============ dump chain ============
-CHAIN_DUMP = ["api_dump", "sqli_dump", "sqli_post_dump", "lfi_dump", "ssrf_dump", "xxe_dump", "rce_dump"]
+CHAIN_DUMP = ["api_dump", "sqli_dump", "lfi_dump", "ssrf_dump", "xxe_dump", "rce_dump"]
 
 # ============ compose ============
 CHAINS = {
