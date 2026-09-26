@@ -19,3 +19,8 @@ _tmp_seclists/
 templates/
 proxy_logs/
 web_runs/
+states/
+proxies/
+reports/*.sarif
+reports/*.junit.xml
+reports/ad_checklist.md

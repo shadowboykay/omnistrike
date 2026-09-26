@@ -120,6 +120,21 @@ def cmd_chain(args):
               timeout=args.timeout, threads=args.threads)
 
 
+
+def cmd_adaptive(args):
+    from core.adaptive_planner import AdaptivePlanner
+    from core.session import Session
+    from core.logger import Logger
+    from core.report import Reporter
+    session = Session(target=args.target, proxy=args.proxy,
+                      timeout=args.timeout, threads=args.threads)
+    logger = Logger(session)
+    planner = AdaptivePlanner(session, logger)
+    result = planner.run(recon_only=getattr(args, "recon_only", False))
+    reporter = Reporter(session, logger)
+    reporter.write(result)
+
+
 def main():
     p = argparse.ArgumentParser(prog="omni", description="OmniStrike v2")
     sub = p.add_subparsers(dest="cmd")
@@ -143,6 +158,12 @@ def main():
     pr.add_argument("--junit", action="store_true")
     pr.add_argument("--resume", action="store_true")
 
+    pa = sub.add_parser("adaptive")
+    pa.add_argument("--target","-t",required=True)
+    pa.add_argument("--proxy","-p",default=None)
+    pa.add_argument("--timeout",type=int,default=5)
+    pa.add_argument("--threads",type=int,default=10)
+    pa.add_argument("--recon-only", action="store_true")
     pc = sub.add_parser("chain")
     pc.add_argument("name", choices=list(CHAINS.keys()))
     pc.add_argument("--target","-t", required=True)
@@ -154,6 +175,7 @@ def main():
     if args.cmd == "list": cmd_list(args)
     elif args.cmd == "run": cmd_run(args)
     elif args.cmd == "chain": cmd_chain(args)
+    elif args.cmd == "adaptive": cmd_adaptive(args)
     else: p.print_help()
 
 
