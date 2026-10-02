@@ -13,10 +13,41 @@ class GraphQLAttack:
 
         for ep in ENDPOINTS:
             url = base + ep
-            r = http.post(url, json={"query":"{__typename}"})
-            if not r or r.status_code not in (200, 400): continue
+            try:
+                r = http.post(url, json={"query":"{__typename}"})
+            except Exception:
+                continue
+            if not r:
+                continue
+
+            # строгая проверка: 200 + JSON + структурный ответ
+            status = r.status_code
+            ct = (r.headers.get("Content-Type") or "").lower()
+            if status != 200:
+                continue
+            if "json" not in ct:
+                continue
+
+            try:
+                data = r.json()
+            except Exception:
+                continue
+
+            is_gql = False
+            if isinstance(data, dict):
+                d = data.get("data")
+                if isinstance(d, dict) and "__typename" in d:
+                    is_gql = True
+                errs = data.get("errors")
+                if isinstance(errs, list) and errs and isinstance(errs[0], dict):
+                    if "locations" in errs[0] or "extensions" in errs[0]:
+                        is_gql = True
+
+            if not is_gql:
+                continue
+
             info["endpoints"].append(ep)
-            print(f"  [+] {ep}")
+            print(f"  [+] GraphQL endpoint: {ep}")
             logger.finding("graphql_endpoint","medium",ep)
 
             # introspection
