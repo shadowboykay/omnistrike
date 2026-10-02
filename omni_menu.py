@@ -75,10 +75,11 @@ def menu_main():
         print(" 25. Template scan v2 (raw/dsl support)")
         print(" 26. Wordlists: показать доступные")
         print(" 27. Wordlists: скачать конкретный список")
+        print(" 28. Verification stats (фильтр ложных сработок)")
         print()
         print("  0. Выход")
         print()
-        c = ask("Выбор [0-27]: ")
+        c = ask("Выбор [0-28]: ")
 
         actions = {
             "1":  menu_run_module,
@@ -108,6 +109,7 @@ def menu_main():
             "25": menu_template_scan_v2,
             "26": menu_wordlists_show,
             "27": menu_wordlist_download,
+            "28": menu_verify_stats,
         }
 
         if c == "0":
@@ -497,6 +499,49 @@ def menu_wordlist_download():
     else:
         os.system("python -c 'from core.wordlist_mgr import download_all; download_all()'")
     input("\nEnter...")
+
+
+def menu_verify_stats():
+    clear()
+    banner()
+    print("  VERIFICATION STATS — фильтр ложных сработок")
+    print("=" * 60)
+    print()
+
+    from core.verify import stats, reset_stats
+    s = stats()
+
+    total = s["passed"] + s["filtered"]
+    print(f"  Всего сигналов:   {total}")
+    print(f"  ✓ passed:         {s['passed']}")
+    print(f"  ✗ filtered:       {s['filtered']}")
+    if total:
+        rate = s["filtered"] / total * 100
+        print(f"  Фильтр-рейт:      {rate:.1f}%")
+    print()
+
+    modules = s.get("modules", {})
+    if not modules:
+        print("  (статистики по модулям нет — запусти любой модуль с verify)")
+    else:
+        print("  По модулям:")
+        print(f"  {'module':<20s} {'passed':>8s} {'filtered':>10s} {'rate':>8s}")
+        print("  " + "-" * 50)
+        for mod, m in sorted(modules.items()):
+            p_cnt, f_cnt = m.get("passed", 0), m.get("filtered", 0)
+            t = p_cnt + f_cnt
+            rate = f_cnt / t * 100 if t else 0.0
+            print(f"  {mod:<20s} {p_cnt:>8d} {f_cnt:>10d} {rate:>7.0f}%")
+        print()
+
+    print("  Действия:")
+    print("    r. сбросить счётчик")
+    print("    Enter — назад")
+    choice = input("  > ").strip().lower()
+    if choice == "r":
+        reset_stats()
+        print("  счётчик сброшен")
+        input("  Enter...")
 
 
 def main():

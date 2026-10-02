@@ -85,7 +85,13 @@ class Backup:
             if not r2 or r2.status_code != 200 or abs(len(r2.content) - size) > 50:
                 continue
 
-            found.append({"path": p, "size": size, "ct": ct})
+            # confidence через общий verify-счётчик
+            from core.verify import is_signal
+            conf = 0.9 if is_binary_target else 0.7
+            if not is_signal(conf, floor=0.55, module="backup"):
+                continue
+
+            found.append({"path": p, "size": size, "ct": ct, "confidence": conf})
             print(f"  [+] {p} ({size}b, {ct})")
             logger.finding(
                 "exposed_file",

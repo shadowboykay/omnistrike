@@ -99,7 +99,7 @@ class Xss:
 
             signal_strength = 0.9  # raw reflection без экранирования — сильный сигнал
             conf = confidence(signal_strength, ratio, baseline=None, sample=None)
-            if not is_signal(conf, floor=0.55):
+            if not is_signal(conf, floor=0.55, module="xss"):
                 print(f"  [{name}] verify failed ({hits}/2)")
                 continue
 

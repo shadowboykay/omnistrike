@@ -71,11 +71,16 @@ class Ssrf:
                     r2 = http.get(url, headers=headers)
                     r2_low = (r2.text or "").lower() if r2 else ""
                     if r2 and hit.lower() in r2_low and hit.lower() not in baseline_text:
+                        # confidence через общий verify-счётчик
+                        from core.verify import is_signal
+                        conf = 0.85 if "creds" in key or "metadata" in key else 0.7
+                        if not is_signal(conf, floor=0.55, module="ssrf"):
+                            continue
                         sev = "critical" if "creds" in key or "metadata" in key else "high"
                         print(f"  ✓ SSRF [{key}]: {hit}")
                         findings.append({"param": name, "key": key,
                                          "url": url_test, "marker": hit,
-                                         "verified": True})
+                                         "verified": True, "confidence": conf})
                         logger.finding(f"ssrf_{key}", sev,
                                        f"{name}={url_test} marker={hit}")
                         vuln_param = name

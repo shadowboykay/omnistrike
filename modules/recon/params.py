@@ -1,7 +1,7 @@
 """params v2 — hidden parameter discovery with baseline+verify (kills false positives)"""
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from core.http import HttpClient
-from core.verify import baseline, verify, confidence, is_signal, random_token
+from core.verify import baseline, verify, confidence, is_signal, random_token, _bump
 
 PARAMS = ["id","page","file","path","url","redirect","next","return","callback","ref",
           "debug","test","admin","user","username","email","token","key","api_key","secret",
@@ -38,16 +38,20 @@ class Params:
             try:
                 r = http.get(target, params={p: PROBE_VALUE})
             except Exception:
+                _bump("params", "filtered")
                 return None
             if not r:
+                _bump("params", "filtered")
                 return None
             body = r.text or ""
             delta = abs(len(body) - bl["len"])
             reflected = PROBE_VALUE in body
 
             if delta <= noise_delta:
+                _bump("params", "filtered")
                 return None
             if not reflected and delta <= noise_delta * 2:
+                _bump("params", "filtered")
                 return None
 
             def rep():
@@ -76,8 +80,8 @@ class Params:
                 sample={"status": r.status_code, "len": len(body)},
                 floor=0.55,
             )
-            if not is_signal(conf, floor=0.55):
-                return None
+            if not is_signal(conf, floor=0.55, module="params"):
+                return None  # _bump уже вызван внутри is_signal
 
             return {"param": p, "delta": delta, "reflected": reflected,
                     "verify_hits": hits, "confidence": conf}

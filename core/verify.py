@@ -110,8 +110,10 @@ def confidence(signal_strength, verify_ratio, baseline=None, sample=None,
     return round(min(conf, 1.0), 3)
 
 
-def is_signal(conf, floor=0.55):
-    return conf >= floor
+def is_signal(conf, floor=0.55, module=None):
+    ok = conf >= floor
+    _bump(module, "passed" if ok else "filtered")
+    return ok
 
 
 def looks_like_soft_404(baseline_res, sample):
@@ -131,3 +133,64 @@ def random_token(n=16):
     import secrets, string
     alphabet = string.ascii_lowercase + string.digits
     return "".join(secrets.choice(alphabet) for _ in range(n))
+
+
+# ============================================================
+# Verification statistics — persistent across processes
+# ============================================================
+
+from pathlib import Path as _P
+import json as _json
+
+_STATS_FILE = _P(__file__).parent.parent / "logs" / "verify_stats.json"
+_STATS_FILE.parent.mkdir(exist_ok=True)
+
+_default = {"passed": 0, "filtered": 0, "modules": {}}
+
+
+def _read():
+    try:
+        if _STATS_FILE.exists():
+            return _json.loads(_STATS_FILE.read_text())
+    except Exception:
+        pass
+    return {"passed": 0, "filtered": 0, "modules": {}}
+
+
+def _write(data):
+    try:
+        _STATS_FILE.write_text(_json.dumps(data, indent=2))
+    except Exception:
+        pass
+
+
+def _bump(module, key):
+    if module is None:
+        return
+    data = _read()
+    data[key] = data.get(key, 0) + 1
+    data.setdefault("modules", {})
+    data["modules"].setdefault(module, {"passed": 0, "filtered": 0})
+    data["modules"][module][key] = data["modules"][module].get(key, 0) + 1
+    _write(data)
+
+
+def stats():
+    return _read()
+
+
+def reset_stats():
+    _write({"passed": 0, "filtered": 0, "modules": {}})
+
+
+# ============================================================
+# (legacy stub to not break old code below)
+# ============================================================
+
+# ============================================================
+
+_stats = {
+    "passed": 0,
+    "filtered": 0,
+    "modules": {},   # module -> {"passed": int, "filtered": int}
+}
