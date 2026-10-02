@@ -37,6 +37,7 @@ class SniperProbe:
                     "len": len(r.content),
                     "time": dt,
                     "hash": hash(r.text[:1000]),
+                    "body": r.text or "",
                 })
             time.sleep(0.15)
 
@@ -51,6 +52,7 @@ class SniperProbe:
             "stable_len": len(set(s["len"] for s in samples_data)) == 1,
             "stable_hash": len(set(s["hash"] for s in samples_data)) == 1,
             "samples": samples_data,
+            "body": samples_data[0]["body"] if samples_data else "",
         }
         return self.baseline
 
@@ -80,17 +82,26 @@ class SniperProbe:
         evidence = ""
         confidence = 0
 
-        # 1. marker match
+        # 1. marker match — ТОЛЬКО если маркера НЕ БЫЛО в baseline
         if detect_markers:
             low = r.text.lower()
+            baseline_low = ""
+            if self.baseline and "body" in self.baseline:
+                baseline_low = (self.baseline["body"] or "").lower()
+
             for m in detect_markers:
-                if m.lower() in low:
-                    hit = True
-                    reason = f"marker:{m}"
-                    idx = low.find(m.lower())
-                    evidence = r.text[max(0, idx - 30):idx + len(m) + 30]
-                    confidence = 70
-                    break
+                ml = m.lower()
+                if ml not in low:
+                    continue
+                # если маркер уже был в baseline — это фон, не сигнал
+                if baseline_low and ml in baseline_low:
+                    continue
+                hit = True
+                reason = f"marker:{m}"
+                idx = low.find(ml)
+                evidence = r.text[max(0, idx - 30):idx + len(m) + 30]
+                confidence = 70
+                break
 
         # 2. raw reflection (XSS)
         if not hit and payload in r.text:

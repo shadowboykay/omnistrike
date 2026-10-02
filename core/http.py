@@ -16,6 +16,9 @@ BLOCK_CODES = (403, 406, 429, 501, 503)
 
 class HttpClient:
     def __init__(self, session, logger=None, auto_mutate=True, adaptive_throttle=True):
+        # анти-петля
+        self._req_history = []
+        self._max_req_history = 60
         self.session = session
         self.logger = logger
         self.counter = 0
@@ -140,6 +143,18 @@ class HttpClient:
     def _send(self, method, url, headers, params, data, json,
               allow_redirects, stream, label):
         self.counter += 1
+        # анти-петля: 60 ИДЕНТИЧНЫХ запросов (method+url+data+params) подряд → abort
+        # одинаковый URL с разным body — это НЕ петля, это работа модуля
+        try:
+            _sig = (method, url, repr(data)[:200], repr(params)[:200])
+            self._req_history.append(_sig)
+            if len(self._req_history) > self._max_req_history:
+                self._req_history = self._req_history[-self._max_req_history:]
+            if (len(self._req_history) == self._max_req_history
+                    and len(set(self._req_history)) == 1):
+                raise RuntimeError(f"[http] loop detected on {url} - aborting")
+        except AttributeError:
+            pass
         t0 = time.time()
         try:
             r = self.s.request(
