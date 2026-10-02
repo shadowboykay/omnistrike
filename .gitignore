@@ -25,3 +25,5 @@ reports/*.sarif
 reports/*.junit.xml
 reports/ad_checklist.md
 logs/
+*.bak_v1
+*.bak_*
