@@ -4,6 +4,7 @@ import time
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.http import HttpClient
 from core.verify import verify, confidence, is_signal
+from core.waf_bypass import mutate_until_pass
 
 MARKER = "omni7x9z"
 
@@ -60,7 +61,13 @@ class Xss:
 
             # 2. пробуем payload, соответствующий контексту
             payload = PAYLOADS.get(context, PAYLOADS["html_body"])
-            r = http.get(self._url(u, params, name, payload))
+            payload_url = self._url(u, params, name, payload)
+
+            # === WAF bypass ===
+            wb = mutate_until_pass(http, payload_url, payload, method="GET")
+            r = wb["response"]
+            if wb["mutation"]:
+                payload = wb["payload"]  # используем мутированную версию дальше
             if not r:
                 continue
 

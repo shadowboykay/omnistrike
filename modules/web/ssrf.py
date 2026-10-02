@@ -2,6 +2,7 @@
 import time
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.http import HttpClient
+from core.waf_bypass import mutate_until_pass
 
 
 # 10 целевых URL (не 85)

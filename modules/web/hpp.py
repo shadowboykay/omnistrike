@@ -1,5 +1,6 @@
 """hpp — HTTP Parameter Pollution probe"""
 from core.http import HttpClient
+from core.waf_bypass import mutate_until_pass
 
 class Hpp:
     def run(self, session, logger):

