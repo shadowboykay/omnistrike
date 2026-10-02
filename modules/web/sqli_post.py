@@ -74,13 +74,27 @@ class SqliPost:
                 print(f"  [field: {field}]")
                 field_found = False
 
+                # чистая сессия для каждого поля — иначе первый bypass "заражает" второй
+                if hasattr(http, "session") and getattr(http, "session") is not None:
+                    try:
+                        http.session.cookies.clear()
+                    except Exception:
+                        pass
+                elif hasattr(http, "_session") and getattr(http, "_session") is not None:
+                    try:
+                        http._session.cookies.clear()
+                    except Exception:
+                        pass
+
                 # Группируем probes по типу для последовательного теста
                 by_type = {
-                    "error": [p for p in SNIPER_SQLI if p["type"] == "error"],
-                    "bypass": [],  # bypass отдельно
-                    "union": [p for p in SNIPER_SQLI if p["type"] == "union"],
-                    "time": [p for p in SNIPER_SQLI if p["type"] == "time"],
+                    "error":   [p for p in SNIPER_SQLI if p["type"] == "error"],
+                    "union":   [p for p in SNIPER_SQLI if p["type"] == "union"],
                     "boolean": [p for p in SNIPER_SQLI if p["type"] == "boolean"],
+                    "stacked": [p for p in SNIPER_SQLI if p["type"] == "stacked"],
+                    "time":    [p for p in SNIPER_SQLI if p["type"] == "time"],
+                    "oob":     [p for p in SNIPER_SQLI if p["type"] == "oob"],
+                    "second_order": [p for p in SNIPER_SQLI if p["type"] == "second_order"],
                 }
 
                 # Bypass-проверка: специальные payload'ы
@@ -107,8 +121,9 @@ class SqliPost:
                 if field_found:
                     continue
 
-                # Error + union + time probes
-                for probe in by_type["error"] + by_type["union"]:
+                # Error + union + boolean + stacked probes
+                combined = by_type["error"] + by_type["union"] + by_type["boolean"] + by_type["stacked"]
+                for probe in combined:
                     pname = probe["name"]
                     payload = probe["payload"]
                     ptype = probe["type"]
@@ -154,6 +169,37 @@ class SqliPost:
                             field_found = True
                             break
 
+                    # boolean — сравнение с baseline + контрольный true/false прогон
+                    elif ptype == "boolean":
+                        diff = len(r.content) - base_len
+                        # boolean payload должен дать заметный сдвиг длины ИЛИ статус
+                        if abs(diff) > 80 or (base and r.status_code != base.status_code):
+                            print(f"    ✓ [{pname}] BOOLEAN diff={diff:+d}b")
+                            findings.append({
+                                "field": field, "name": pname,
+                                "payload": payload, "type": "boolean",
+                                "diff": diff, "dbms": probe["dbms"],
+                            })
+                            logger.finding("sqli_post_boolean", "high",
+                                           f"{field} {pname} diff={diff}")
+                            field_found = True
+                            break
+
+                    # stacked — обычно те же error-маркеры, что и для error
+                    elif ptype == "stacked":
+                        for m in ERROR_MARKERS:
+                            if m in low:
+                                print(f"    ✓ [{pname}] STACKED → {m[:40]}")
+                                findings.append({
+                                    "field": field, "name": pname,
+                                    "payload": payload, "type": "stacked",
+                                    "marker": m, "dbms": probe["dbms"],
+                                })
+                                logger.finding("sqli_post_stacked", "high",
+                                               f"{field} {pname}: {m[:40]}")
+                                field_found = True
+                                break
+
                     if field_found:
                         break
 
@@ -185,23 +231,39 @@ class SqliPost:
                         break
 
             # verify if any bypass/error found
-            if findings:
-                print(f"  [verify] повторная проверка")
-                first = findings[0]
+            # verify ВСЕ findings для этой формы, на чистой сессии каждый
+            for f in findings:
+                if f.get("verified"):
+                    continue
+                if hasattr(http, "session") and getattr(http, "session") is not None:
+                    try:
+                        http.session.cookies.clear()
+                    except Exception:
+                        pass
                 data = {user_field: "admin", pass_field: "x"}
-                data[first["field"]] = first["payload"]
+                data[f["field"]] = f["payload"]
                 r = http.post(url, data=data, allow_redirects=True)
-                if r:
-                    low = r.text.lower()
-                    verified = (
-                        (first["type"] == "auth_bypass" and self._has_success(r)) or
-                        (first["type"] == "error" and any(m in low for m in ERROR_MARKERS))
-                    )
-                    if verified:
-                        print(f"    ✓ VERIFIED")
-                        first["verified"] = True
-                        logger.finding("sqli_post_verified", "critical",
-                                       f"verified on {action}")
+                if not r:
+                    continue
+                low = r.text.lower()
+                if f["type"] == "auth_bypass":
+                    ok = self._has_success(r)
+                elif f["type"] in ("error", "stacked"):
+                    ok = any(m in low for m in ERROR_MARKERS)
+                elif f["type"] == "boolean":
+                    # boolean верифицируем как стабильный сдвиг — сравниваем с baseline
+                    ok = abs(len(r.content) - base_len) > 80
+                elif f["type"] == "union":
+                    ok = abs(len(r.content) - base_len) > 50
+                else:
+                    ok = False
+                if ok:
+                    f["verified"] = True
+                    print(f"    ✓ VERIFIED [{f['field']}/{f['name']}]")
+                    logger.finding("sqli_post_verified", "critical",
+                                   f"verified {f['field']}/{f['name']} on {action}")
+                else:
+                    print(f"    ✗ NOT VERIFIED [{f['field']}/{f['name']}]")
 
         print()
         print(f"[sqli_post v5] findings: {len(findings)}")

