@@ -40,76 +40,100 @@ def menu_main():
         clear()
         banner()
         print("  АТАКИ:")
-        print("  1. Одна атака (выбрать модуль)")
-        print("  2. Цепочка (chain)")
-        print("  3. Список всех модулей")
-        print("  4. Список цепочек")
+        print("   1. Одна атака (выбрать модуль)")
+        print("   2. Цепочка (chain)")
+        print("   3. Adaptive (recon → теги → атаки)")
+        print("   4. Sniper mode (низкий шум)")
+        print("   5. Список всех модулей")
+        print("   6. Список цепочек")
+        print()
+        print("  РАЗВЕДКА И FINGERPRINT:")
+        print("   7. Tech fingerprint (server/CMS/framework)")
+        print("   8. Subdomain full (crt.sh + dns_history + urlscan + DoH)")
+        print("   9. HTTP audit (headers + cookie + CSP)")
+        print("  10. API discovery (api_hunter + swagger + api_leak)")
+        print("  11. CVE-скан (по fingerprint)")
+        print("  12. Template scan (Nuclei)")
+        print("  13. Template scan v2 (raw/dsl)")
+        print()
+        print("  WAF / ЗАЩИТА:")
+        print("  14. WAF audit (detect + evasion)")
+        print("  15. Аудит защиты (security_audit)")
+        print("  16. CIS Compliance check")
+        print("  17. Chameleon (детект WAF/honeypot)")
         print()
         print("  ИНСТРУМЕНТЫ:")
-        print("  5. Аудит защиты (security_audit)")
-        print("  6. CIS Compliance check")
-        print("  7. CVE-скан (по fingerprint)")
-        print("  8. Template scan (Nuclei-шаблоны)")
-        print("  9. Payload lab (лаборатория)")
-        print(" 10. Authenticated scan (с кредами)")
-        print(" 11. Agent (автономное планирование)")
-        print(" 12. Chameleon (детект WAF/honeypot)")
-        print(" 13. Swarm (50 идентичностей)")
-        print(" 14. Defense analysis (что видит SOC)")
+        print("  18. Payload lab (лаборатория)")
+        print("  19. Authenticated scan (с кредами)")
+        print("  20. Agent (автономное планирование)")
+        print("  21. Swarm (50 идентичностей)")
+        print("  22. Defense analysis (что видит SOC)")
+        print("  23. Payload library stats")
         print()
-        print("  СЕТЬ:")
-        print(" 15. Прокси: обновить список")
-        print(" 16. Прокси: показать рабочие")
-        print(" 17. Tor: проверить")
-        print(" 18. Proxy server (Burp-lite)")
-        print(" 19. Templates: скачать все (Nuclei)")
-        print(" 20. Wordlists: скачать SecLists")
+        print("  СЕТЬ / ПРОКСИ:")
+        print("  24. Прокси: обновить список")
+        print("  25. Прокси: показать рабочие")
+        print("  26. Tor: проверить")
+        print("  27. Proxy server (Burp-lite)")
+        print("  28. Templates: скачать все (Nuclei)")
+        print("  29. Wordlists: скачать SecLists")
         print()
-        print("  ОТЧЁТЫ И АНАЛИЗ:")
-        print(" 21. SARIF report (GitHub Security tab)")
-        print(" 22. Diff сканов (что изменилось)")
-        print(" 23. Webhook notify (Slack/Discord/Telegram)")
-        print(" 24. PDF report (последний скан)")
+        print("  ОТЧЁТЫ:")
+        print("  30. SARIF report (GitHub Security tab)")
+        print("  31. Diff сканов (что изменилось)")
+        print("  32. Webhook notify (Slack/Discord/Telegram)")
+        print("  33. PDF report (последний скан)")
+        print("  34. Report cleanup (удалить старые)")
         print()
-        print("  РАСШИРЕННОЕ:")
-        print(" 25. Template scan v2 (raw/dsl support)")
-        print(" 26. Wordlists: показать доступные")
-        print(" 27. Wordlists: скачать конкретный список")
-        print(" 28. Verification stats (фильтр ложных сработок)")
+        print("  МЕТА:")
+        print("  35. Verification stats (baseline/verify)")
+        print("  36. Wordlists: показать доступные")
+        print("  37. Wordlists: скачать конкретный")
+        print("  38. Live tests (test_all.py)")
         print()
-        print("  0. Выход")
+        print("   0. Выход")
         print()
-        c = ask("Выбор [0-28]: ")
+        c = ask("Выбор [0-38]: ")
 
         actions = {
             "1":  menu_run_module,
             "2":  menu_chain,
-            "3":  menu_list,
-            "4":  menu_chains_list,
-            "5":  menu_audit,
-            "6":  menu_compliance,
-            "7":  menu_cve_scan,
-            "8":  menu_template_scan,
-            "9":  menu_payload_lab,
-            "10": menu_auth_scan,
-            "11": menu_agent,
-            "12": menu_chameleon,
-            "13": menu_swarm,
-            "14": menu_defense,
-            "15": menu_proxy_update,
-            "16": menu_proxy_show,
-            "17": menu_tor,
-            "18": menu_proxy_server,
-            "19": menu_download_templates,
-            "20": menu_download_wordlists,
-            "21": menu_sarif,
-            "22": menu_diff,
-            "23": menu_webhook,
-            "24": menu_pdf_last,
-            "25": menu_template_scan_v2,
-            "26": menu_wordlists_show,
-            "27": menu_wordlist_download,
-            "28": menu_verify_stats,
+            "3":  menu_adaptive,
+            "4":  menu_sniper_mode,
+            "5":  menu_list,
+            "6":  menu_chains_list,
+            "7":  menu_fingerprint,
+            "8":  menu_subdomain_full,
+            "9":  menu_http_audit,
+            "10": menu_api_discovery,
+            "11": menu_cve_scan,
+            "12": menu_template_scan,
+            "13": menu_template_scan_v2,
+            "14": menu_waf_audit,
+            "15": menu_audit,
+            "16": menu_compliance,
+            "17": menu_chameleon,
+            "18": menu_payload_lab,
+            "19": menu_auth_scan,
+            "20": menu_agent,
+            "21": menu_swarm,
+            "22": menu_defense,
+            "23": menu_payload_stats,
+            "24": menu_proxy_update,
+            "25": menu_proxy_show,
+            "26": menu_tor,
+            "27": menu_proxy_server,
+            "28": menu_download_templates,
+            "29": menu_download_wordlists,
+            "30": menu_sarif,
+            "31": menu_diff,
+            "32": menu_webhook,
+            "33": menu_pdf_last,
+            "34": menu_report_cleanup,
+            "35": menu_verify_stats,
+            "36": menu_wordlists_show,
+            "37": menu_wordlist_download,
+            "38": menu_live_tests,
         }
 
         if c == "0":
@@ -118,6 +142,7 @@ def menu_main():
             actions[c]()
         else:
             input("Неверно. Enter...")
+
 
 
 # ============ BASIC ============
@@ -542,6 +567,304 @@ def menu_verify_stats():
         reset_stats()
         print("  счётчик сброшен")
         input("  Enter...")
+
+
+
+
+# ============ NEW 2026-10 ============
+
+def menu_adaptive():
+    target = ask("Target: ")
+    if not target:
+        return
+    ro = ask("Recon-only (пассивно)? [y/N]: ").lower() == "y"
+    flag = " --recon-only" if ro else ""
+    os.system(f"python omni.py adaptive --target '{target}'{flag}")
+    input("\nEnter...")
+
+
+def menu_sniper_mode():
+    """Sniper — минимальный шум, максимальная точность."""
+    clear(); banner()
+    print("  SNIPER MODE")
+    print("  ==========")
+    print("  Минимум запросов, высокая точность.")
+    print()
+    target = ask("Target: ")
+    if not target:
+        return
+    mod = ask("Модуль (sqli / sqli_post / xss / lfi / ssrf / ssti) [sqli]: ") or "sqli"
+    if mod in ("sqli", "xss", "lfi", "ssrf", "ssti"):
+        os.system(f"python omni.py run web {mod} --target '{target}' --extra 'sniper=1' --timeout 15")
+    elif mod == "sqli_post":
+        post = ask("POST данные (uid=admin&passw=test): ")
+        if post:
+            os.system(f"python omni.py run web sqli_post --target '{target}' --extra 'post={post}' --extra 'sniper=1' --timeout 15")
+    else:
+        print(f"Неизвестный модуль: {mod}")
+    input("\nEnter...")
+
+
+def menu_fingerprint():
+    """Tech fingerprint + favicon + cookie + CSP в одном прогоне."""
+    clear(); banner()
+    print("  FINGERPRINT (tech + favicon + cookie + CSP)")
+    print("  ===========================================")
+    target = ask("Target: ")
+    if not target:
+        return
+    print()
+    print(f"  [1/4] tech_fingerprint...")
+    os.system(f"python omni.py run recon tech_fingerprint --target '{target}' --timeout 10 2>&1 | tail -15")
+    print()
+    print(f"  [2/4] favicon...")
+    os.system(f"python omni.py run recon favicon --target '{target}' --timeout 10 2>&1 | tail -12")
+    print()
+    print(f"  [3/4] cookie...")
+    os.system(f"python omni.py run web cookie --target '{target}' --timeout 10 2>&1 | tail -12")
+    print()
+    print(f"  [4/4] csp...")
+    os.system(f"python omni.py run web csp --target '{target}' --timeout 10 2>&1 | tail -12")
+    print()
+    print("  Отчёты: reports/")
+    input("\nEnter...")
+
+
+def menu_subdomain_full():
+    """4 источника поддоменов: crt.sh + dns_history + urlscan + DoH."""
+    clear(); banner()
+    print("  SUBDOMAIN FULL")
+    print("  ==============")
+    print("  crt.sh + dns_history + urlscan + subdomain_brute (DoH)")
+    print()
+    domain = ask("Domain (example.com): ")
+    if not domain:
+        return
+    domain = domain.replace("https://", "").replace("http://", "").rstrip("/")
+    print()
+    print(f"  [1/4] crt_sh...")
+    os.system(f"python omni.py run recon crt_sh --target 'http://{domain}/' --timeout 20 2>&1 | tail -15")
+    print()
+    print(f"  [2/4] dns_history (HackerTarget)...")
+    os.system(f"python omni.py run recon dns_history --target 'http://{domain}/' --timeout 20 2>&1 | tail -15")
+    print()
+    print(f"  [3/4] urlscan...")
+    os.system(f"python omni.py run recon urlscan --target 'http://{domain}/' --timeout 20 2>&1 | tail -15")
+    print()
+    print(f"  [4/4] subdomain_brute (DoH)...")
+    os.system(f"python omni.py run recon subdomain_brute --target '{domain}' --timeout 20 2>&1 | tail -20")
+    print()
+    print("  Отчёты: reports/")
+    input("\nEnter...")
+
+
+def menu_http_audit():
+    """Headers + cookie + CSP + server fingerprint — security hygiene check."""
+    clear(); banner()
+    print("  HTTP AUDIT — security hygiene")
+    print("  =============================")
+    target = ask("Target: ")
+    if not target:
+        return
+    print()
+    print(f"  [1/3] cookie flags (Secure/HttpOnly/SameSite)...")
+    os.system(f"python omni.py run web cookie --target '{target}' --timeout 10 2>&1 | tail -12")
+    print()
+    print(f"  [2/3] CSP + missing security headers...")
+    os.system(f"python omni.py run web csp --target '{target}' --timeout 10 2>&1 | tail -15")
+    print()
+    print(f"  [3/3] tech_fingerprint...")
+    os.system(f"python omni.py run recon tech_fingerprint --target '{target}' --timeout 10 2>&1 | tail -12")
+    print()
+    input("\nEnter...")
+
+
+def menu_api_discovery():
+    """api_hunter + swagger + api_leak — все источники API."""
+    clear(); banner()
+    print("  API DISCOVERY")
+    print("  =============")
+    target = ask("Target: ")
+    if not target:
+        return
+    print()
+    print(f"  [1/3] api_hunter (HTML/JS mining + swagger + graphql)...")
+    os.system(f"python omni.py run recon api_hunter --target '{target}' --timeout 25 2>&1 | tail -25")
+    print()
+    print(f"  [2/3] swagger (OpenAPI spec extraction)...")
+    os.system(f"python omni.py run web swagger --target '{target}' --timeout 15 2>&1 | tail -15")
+    print()
+    print(f"  [3/3] api_leak (secrets in JS bundles)...")
+    os.system(f"python omni.py run web api_leak --target '{target}' --timeout 15 2>&1 | tail -15")
+    print()
+    input("\nEnter...")
+
+
+def menu_waf_audit():
+    """WAF detect v3 + evasion v2 — полный аудит защиты."""
+    clear(); banner()
+    print("  WAF AUDIT — detect + evasion")
+    print("  ============================")
+    target = ask("Target: ")
+    if not target:
+        return
+    print()
+    print(f"  [1/2] waf_detect v3 (passive + active + behavioral + rate-limit)...")
+    os.system(f"python omni.py run recon waf_detect --target '{target}' --timeout 15 2>&1 | tail -30")
+    print()
+    print(f"  [2/2] waf_evasion v2 (WAF-specific routing + mutation chain)...")
+    waf = ask("WAF type (Cloudflare/Akamai/AWS WAF/Imperva/ModSecurity/Sucuri — Enter=auto): ") or ""
+    extra = f" --extra 'waf={waf}'" if waf else ""
+    os.system(f"python omni.py run bypass waf_evasion --target '{target}'{extra} --timeout 15 2>&1 | tail -25")
+    print()
+    input("\nEnter...")
+
+
+def menu_payload_stats():
+    """Статистика payload-библиотек."""
+    clear(); banner()
+    print("  PAYLOAD LIBRARY STATS")
+    print("  =====================")
+    print()
+
+    # sniper
+    try:
+        from core.sniper_payloads import SNIPER_SQLI, GROUPS
+        from collections import Counter
+        print(f"  SQLi sniper (curated): {len(SNIPER_SQLI)}")
+        by_type = Counter(p["type"] for p in SNIPER_SQLI)
+        for t, c in sorted(by_type.items()):
+            print(f"    {t:14s} {c:3d}")
+        by_dbms = Counter(p["dbms"] for p in SNIPER_SQLI)
+        print(f"  По СУБД:")
+        for d, c in sorted(by_dbms.items()):
+            print(f"    {d:14s} {c:3d}")
+    except Exception as e:
+        print(f"  sniper_payloads: ERROR {e}")
+
+    print()
+
+    # waf_bypass
+    try:
+        from core.waf_bypass import MUTATORS, mutate_content_type
+        print(f"  WAF-мутации: {len(MUTATORS)}")
+        for name, _ in MUTATORS:
+            print(f"    {name}")
+        ct = mutate_content_type()
+        print(f"  Content-Type вариантов: {len(ct)}")
+    except Exception as e:
+        print(f"  waf_bypass: ERROR {e}")
+
+    print()
+
+    # payload_source
+    try:
+        from core.payload_source import CONTEXTS
+        print(f"  Payload contexts: {len(CONTEXTS) if hasattr(CONTEXTS, '__len__') else 'N/A'}")
+    except Exception as e:
+        print(f"  payload_source: проверь вручную (core/payload_source.py)")
+
+    print()
+
+    # wordlists
+    try:
+        import os
+        wl_dir = "wordlists"
+        if os.path.isdir(wl_dir):
+            print(f"  Wordlists:")
+            for f in sorted(os.listdir(wl_dir)):
+                path = os.path.join(wl_dir, f)
+                if os.path.isfile(path):
+                    try:
+                        with open(path) as fh:
+                            n = sum(1 for _ in fh)
+                        print(f"    {f:30s} {n:>8d} lines")
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
+    print()
+    input("Enter...")
+
+
+def menu_report_cleanup():
+    """Удаление старых отчётов из reports/."""
+    clear(); banner()
+    print("  REPORT CLEANUP")
+    print("  ==============")
+    print()
+    import os
+    from pathlib import Path
+    rd = Path("reports")
+    if not rd.is_dir():
+        print("  reports/ не найдена")
+        input("Enter...")
+        return
+    files = sorted(rd.glob("*"), key=lambda f: f.stat().st_mtime)
+    if not files:
+        print("  reports/ пуста")
+        input("Enter...")
+        return
+    print(f"  Всего файлов: {len(files)}")
+    total_size = sum(f.stat().st_size for f in files if f.is_file())
+    print(f"  Размер: {total_size / 1024 / 1024:.1f} MB")
+    print()
+    print("  Действия:")
+    print("    a — удалить ВСЕ отчёты")
+    print("    o — удалить старше 7 дней")
+    print("    x — удалить конкретный по паттерну")
+    print("    Enter — назад")
+    c = input("  > ").strip().lower()
+
+    import time
+    if c == "a":
+        confirm = input(f"  Удалить {len(files)} файлов? [y/N]: ").lower()
+        if confirm == "y":
+            for f in files:
+                if f.is_file():
+                    f.unlink()
+            print(f"  Удалено: {len(files)}")
+    elif c == "o":
+        cutoff = time.time() - 7 * 86400
+        old = [f for f in files if f.stat().st_mtime < cutoff]
+        confirm = input(f"  Удалить {len(old)} файлов старше 7 дней? [y/N]: ").lower()
+        if confirm == "y":
+            for f in old:
+                if f.is_file():
+                    f.unlink()
+            print(f"  Удалено: {len(old)}")
+    elif c == "x":
+        pat = input("  Паттерн (например 'testfire'): ").strip()
+        if pat:
+            matched = [f for f in files if pat in f.name]
+            if matched:
+                print(f"  Найдено: {len(matched)}")
+                for f in matched[:10]:
+                    print(f"    {f.name}")
+                confirm = input("  Удалить? [y/N]: ").lower()
+                if confirm == "y":
+                    for f in matched:
+                        if f.is_file():
+                            f.unlink()
+                    print(f"  Удалено: {len(matched)}")
+    input("Enter...")
+
+
+def menu_live_tests():
+    """Live tests — test_all.py на demo.testfire.net."""
+    clear(); banner()
+    print("  LIVE TESTS — test_all.py")
+    print("  =======================")
+    print()
+    print("  Прогон всех модулей на demo.testfire.net (IBM полигон)")
+    print("  Может занять 5-15 минут")
+    print()
+    c = input("  Запустить? [y/N]: ").strip().lower()
+    if c == "y":
+        os.system("python test_all.py 2>&1 | tail -60")
+    input("\nEnter...")
+
 
 
 def main():
