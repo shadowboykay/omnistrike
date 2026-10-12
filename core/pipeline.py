@@ -10,9 +10,19 @@ from core.report import Reporter
 
 # ============ recon chain ============
 CHAIN_RECON = [
-    "crt_sh", "subdomain_brute", "dns", "dns_zone_transfer", "waf_detect",
-    "tech_fingerprint", "robots", "sitemap", "wayback",
-    "email_harvest", "favicon", "shodan_query",
+    # core discovery
+    "crt_sh", "subdomain_brute", "dns", "dns_zone_transfer",
+    "dns_history", "urlscan", "asn_lookup",
+    # fingerprint
+    "waf_detect", "tech_fingerprint", "favicon", "shodan_query",
+    # content
+    "robots", "sitemap", "wayback", "email_harvest",
+    # api
+    "api_hunter", "graphql", "params", "swagger",
+    # buckets
+    "s3_bucket",
+    # compliance
+    "compliance_check",
 ]
 
 # ============ web chain (50 modules) ============
@@ -26,8 +36,9 @@ CHAIN_WEB = [
     "hpp", "http_method_override", "cache_deception",
     "ssi_injection", "websocket", "websocket_fuzz",
     # auth
-    "jwt", "jwt_bypass", "saml_attack", "oauth_misconfig",
-    "password_reset_flaws", "file_upload_bypass",
+    "jwt", "jwt_bypass", "jwt_confusion", "saml_attack", "oauth_misconfig",
+    "oauth_token_theft", "session_hijack", "password_reset_flaws",
+    "file_upload_bypass",
     # injection
     "crlf", "http_request_splitting", "nosql_injection", "ldap_injection",
     "xss", "xss_dom", "sqli", "lfi", "ssti", "ssrf", "rfi", "xxe",
@@ -58,6 +69,43 @@ CHAIN_OSINT = ["domain", "ip", "email", "username"]
 # ============ dump chain ============
 CHAIN_DUMP = ["api_dump", "sqli_dump", "lfi_dump", "ssrf_dump", "xxe_dump", "rce_dump"]
 
+
+# ============ exploit chain (CVE-specific) ============
+CHAIN_EXPLOIT = [
+    # fingerprint-based (generic)
+    "cve_match", "cve_scan", "default_creds",
+    # popular CVEs 2021-2025
+    "log4shell", "spring4shell", "shellshock",
+    "citrix_adc", "citrix_bleed",
+    "confluence_ognl", "exchange_proxyshell",
+    "moveit_sqli", "ivanti_csa", "ivanti_epmm",
+    "fortinet_sslvpn", "cisco_iosxe", "nextjs_rce",
+    "panos_rce", "teamcity_auth", "php_cgi",
+    "jenkins_rce",
+    # generic vuln classes
+    "prototype_pollution", "subdomain_takeover",
+]
+
+
+# ============ post chain ============
+CHAIN_POST = [
+    "privesc_check", "persistence", "lateral",
+    "attack_graph", "defense_analyzer",
+    "cleanup", "diff_scan", "loot",
+]
+
+
+# ============ ad chain ============
+CHAIN_AD = ["ldap_enum", "checklist"]
+
+
+# ============ mobile chain ============
+CHAIN_MOBILE = ["apk_analyze", "dex_decompile", "frida_hook", "ios_plist"]
+
+
+# ============ c2 chain ============
+CHAIN_C2 = ["agent_builder", "beacon_dns", "listener"]
+
 # ============ compose ============
 CHAINS = {
     "recon":    [("recon", m) for m in CHAIN_RECON],
@@ -67,15 +115,29 @@ CHAINS = {
     "cloud":    [("cloud", m) for m in CHAIN_CLOUD],
     "osint":    [("osint", m) for m in CHAIN_OSINT],
     "dump":     [("dump", m) for m in CHAIN_DUMP],
+    "exploit":  [("exploit", m) for m in CHAIN_EXPLOIT],
+    "post":     [("post", m) for m in CHAIN_POST],
+    "ad":       [("ad", m) for m in CHAIN_AD],
+    "mobile":   [("mobile", m) for m in CHAIN_MOBILE],
+    "c2":       [("c2", m) for m in CHAIN_C2],
+
+    # compositions
     "full":     [("recon", m) for m in CHAIN_RECON] +
                 [("web", m) for m in CHAIN_WEB] +
-                [("bypass", m) for m in CHAIN_BYPASS],
+                [("bypass", m) for m in CHAIN_BYPASS] +
+                [("exploit", m) for m in CHAIN_EXPLOIT] +
+                [("dump", m) for m in CHAIN_DUMP],
+
     "extended": [("recon", m) for m in CHAIN_RECON] +
                 [("web", m) for m in CHAIN_WEB] +
                 [("bypass", m) for m in CHAIN_BYPASS] +
+                [("exploit", m) for m in CHAIN_EXPLOIT] +
+                [("dump", m) for m in CHAIN_DUMP] +
                 [("evasion", m) for m in CHAIN_EVASION] +
                 [("cloud", m) for m in CHAIN_CLOUD] +
-                [("osint", m) for m in CHAIN_OSINT],
+                [("osint", m) for m in CHAIN_OSINT] +
+                [("post", m) for m in CHAIN_POST],
+
     "auto":     None,  # special: auto_exploit chain with chaining (see below)
 }
 
