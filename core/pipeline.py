@@ -11,7 +11,7 @@ from core.report import Reporter
 # ============ recon chain ============
 CHAIN_RECON = [
     "crt_sh", "subdomain_brute", "dns", "dns_zone_transfer", "waf_detect",
-    "tech_fingerprint", "robots", "sitemap", "wayback", "dorks",
+    "tech_fingerprint", "robots", "sitemap", "wayback",
     "email_harvest", "favicon", "shodan_query",
 ]
 
