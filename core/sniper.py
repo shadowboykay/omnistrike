@@ -128,6 +128,15 @@ class SniperProbe:
         if not hit and self.baseline:
             time_diff = dt - self.baseline["avg_time"]
             if time_diff > 2.5:
+                # FP-фильтр: giant response ≠ time-based SQLi
+                # (sweb/Apache placeholder 312KB грузится 3-7s и ложно сигналит)
+                base_len = self.baseline.get("len", 0) or 1
+                size_ratio = len(r.content) / base_len
+                if size_ratio > 20:
+                    self.stats["fp_filtered"] += 1
+                    return {"hit": False,
+                            "reason": f"giant_response:{len(r.content)}b_vs_{base_len}b",
+                            "confidence": 0}
                 hit = True
                 reason = f"time_delay:{time_diff:.1f}s"
                 evidence = f"baseline={self.baseline['avg_time']:.2f}s, now={dt:.2f}s"

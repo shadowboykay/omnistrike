@@ -59,6 +59,7 @@ class Sqli:
         print()
 
         findings = []
+        oob_candidates = []
         vuln_param = None
         vuln_type = None
 
@@ -178,10 +179,10 @@ class Sqli:
 
                 # --- oob ---
                 elif ptype == "oob":
-                    # OOB не проверим без внешнего listener, но проверим что запрос не падает
+                    # OOB не проверим без внешнего listener — отдельный список
                     if r.status_code == 200 and "sql" not in low[:200]:
                         print(f"  ~ [{pname}] OOB-possible (нужен listener)")
-                        findings.append({
+                        oob_candidates.append({
                             "param": name, "name": pname, "payload": payload,
                             "type": "oob_candidate", "dbms": probe["dbms"],
                             "unique": probe["unique"],
@@ -219,8 +220,10 @@ class Sqli:
 
         print()
         print(f"[sqli v8] findings: {len(findings)}")
+        if oob_candidates:
+            print(f"[sqli v8] oob_candidates: {len(oob_candidates)}  (нужен OOB listener для подтверждения)")
         print(f"[sqli v8] vulnerable: {vuln_param} ({vuln_type})")
-        return {"findings": findings, "param": vuln_param, "type": vuln_type}
+        return {"findings": findings, "param": vuln_param, "type": vuln_type, "oob_candidates": oob_candidates}
 
     def _baseline_time(self, http, url, samples=3):
         times = []
