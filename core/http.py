@@ -204,7 +204,19 @@ class HttpClient:
             self._throttle_on_success()
 
         # auto-mutate on block
-        if mutate_enabled and r.status_code in BLOCK_CODES:
+        # пропускаем static-block пути: sweb/nginx режет /admin* как правило,
+        # не как WAF-защиту — мутации бесполезны
+        STATIC_BLOCK_SUFFIXES = (
+            "/admin", "/administrator", "/wp-admin", "/wp-login.php",
+            "/phpmyadmin", "/pma", "/.git", "/.env", "/.svn",
+            "/server-status", "/server-info", "/manager/html",
+        )
+        _url_path = url.split("?")[0].rstrip("/").lower()
+        _is_static_block = any(
+            _url_path.endswith(suf) or (suf + "/") in _url_path + "/"
+            for suf in STATIC_BLOCK_SUFFIXES
+        )
+        if mutate_enabled and r.status_code in BLOCK_CODES and not _is_static_block:
             if self.live:
                 print(f"    ↻ #{self.counter} blocked {r.status_code}, auto-mutating...", flush=True)
 
